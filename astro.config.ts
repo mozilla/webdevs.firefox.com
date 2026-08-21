@@ -6,6 +6,8 @@ import mdx from '@astrojs/mdx';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://webdevs.firefox.com',
-  trailingSlash: 'always',
   integrations: [preact(), mdx()],
+  build: {
+    format: 'preserve',
+  },
 });
