@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "check": "pnpm run format:check; astro check",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
