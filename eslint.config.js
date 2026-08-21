@@ -1,20 +1,29 @@
 import js from '@eslint/js';
+import markdown from '@eslint/markdown';
+import { defineConfig } from 'eslint/config';
 import astro from 'eslint-plugin-astro';
 import unicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default [
+import preferShortLinks from './eslint-rules/prefer-short-links.js';
+
+export default defineConfig([
   {
-    ignores: ['dist/', '.astro/'],
+    // `CLAUDE.md` is a symlink to `AGENTS.md`; lint the file itself, once.
+    ignores: ['dist/', '.astro/', 'CLAUDE.md'],
   },
 
-  js.configs.recommended,
-  ...tseslint.configs.strictTypeChecked,
-  unicorn.configs.recommended,
-  ...astro.configs.recommended,
-
   {
+    files: codeFiles,
+
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.strictTypeChecked,
+      unicorn.configs.recommended,
+      astro.configs.recommended,
+    ],
+
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -57,6 +66,14 @@ export default [
   // Type-aware linting can't parse these; lint them syntactically.
   {
     files: ['**/*.js'],
-    ...tseslint.configs.disableTypeChecked,
+    extends: [tseslint.configs.disableTypeChecked],
   },
-];
+
+  {
+    files: ['**/*.md'],
+    plugins: {
+      markdown,
+    },
+    extends: ['markdown/recommended'],
+  },
+]);
