@@ -1,0 +1,38 @@
+---
+interface Props {
+  title: string;
+  description?: string | undefined;
+  /** Path to a social share image, resolved against the site URL. */
+  image?: string | undefined;
+}
+
+const { title, description, image } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const imageURL = image ? new URL(image, Astro.site) : undefined;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width" />
+<meta name="generator" content={Astro.generator} />
+
+<title>{title}</title>
+{description && <meta name="description" content={description} />}
+<link rel="canonical" href={canonical} />
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" href="/favicon.ico" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content={title} />
+{description && <meta property="og:description" content={description} />}
+<meta property="og:url" content={canonical} />
+{imageURL && <meta property="og:image" content={imageURL} />}
+
+<meta
+  name="twitter:card"
+  content={imageURL ? 'summary_large_image' : 'summary'}
+/>
+<meta name="twitter:title" content={title} />
+{description && <meta name="twitter:description" content={description} />}
+{imageURL && <meta name="twitter:image" content={imageURL} />}
