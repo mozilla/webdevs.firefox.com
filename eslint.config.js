@@ -6,8 +6,6 @@ import unicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-import preferShortLinks from './eslint-rules/prefer-short-links.js';
-
 export default defineConfig([
   {
     // `CLAUDE.md` is a symlink to `AGENTS.md`; lint the file itself, once.
