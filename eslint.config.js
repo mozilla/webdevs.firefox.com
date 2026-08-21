@@ -6,6 +6,8 @@ import unicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+const codeFiles = ['**/*.{js,mjs,cjs,ts,mts,cts,astro}'];
+
 export default defineConfig([
   {
     // `CLAUDE.md` is a symlink to `AGENTS.md`; lint the file itself, once.
