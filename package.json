@@ -10,13 +10,17 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@astrojs/preact": "^6.0.4",
     "astro": "^7.2.4",
     "preact": "^10.29.8",
+    "prettier": "3.9.6",
+    "prettier-plugin-astro": "0.14.1",
     "typescript": "^6.0.3"
   }
 }
