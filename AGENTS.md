@@ -122,6 +122,22 @@ Load the `figma-design-to-code` skill before calling `get_design_context`.
 - The generated code uses absolute positioning. Rebuild layouts properly with
   grid rather than transcribing offsets, and expect small height differences
   from the Figma frame as a result.
+- **A component's own node says nothing about where it sits on the page.**
+  `get_design_context` on an instance returns it in isolation, so the margins
+  around it are simply absent from the output — and absent reads as zero, not
+  as unknown. Before styling a component's outer spacing, call `get_metadata`
+  on the parent frame and derive the offsets from the child's `x`/`y`/`width`
+  against the parent's width. On the 1440-wide Home frame the Header instance
+  is at `x=16, y=20, width=1408`: a 16 page gutter and 20 above the header,
+  neither of which appears anywhere in the Header node itself.
+- The gutter belongs inside the page cap, not outside it. `.wrapper` is capped
+  at `--page-max-width` (90rem) so `--gutter` is carved out of it, leaving
+  `--content-max-width` (88rem). Capping at 88rem *and* padding would inset
+  the content twice.
+- If a measured value has no token, that is a signal, not a rounding problem.
+  The spacing scale is 0/8/12/16/24/32/40/80, so a 20 is positional — write
+  the literal `1.25rem` with a comment. Never snap to the nearest token to
+  make a value look tokenised.
 - Download image and SVG assets into `src/assets/` and commit them. Figma's
   asset URLs expire after about 7 days.
 - Icons and logos exported from Figma may have hardcoded fills. Swap them for
