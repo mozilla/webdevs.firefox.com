@@ -1,0 +1,56 @@
+---
+import MainLayout from '~/layouts/MainLayout.astro';
+import Header from '~/components/Header.astro';
+import Footer from '~/components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string | undefined;
+  image?: string | undefined;
+}
+
+const { title, description, image } = Astro.props;
+---
+
+<MainLayout title={title} description={description} image={image}>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <!-- <Footer /> -->
+  </div>
+</MainLayout>
+
+<style>
+  /* Pins the footer to the bottom on short pages. */
+  .shell {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100dvh;
+  }
+
+  .skip-link {
+    position: absolute;
+    top: var(--space-8);
+    left: var(--space-8);
+    z-index: 1;
+    padding: var(--space-8) var(--space-16);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-purple-fixed);
+    color: var(--color-white-fixed);
+    font-size: var(--text-body-xs);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .skip-link:not(:focus-visible) {
+    /* Hidden until focused, but still reachable by keyboard and AT. */
+    clip-path: inset(50%);
+    width: 0.0625rem;
+    height: 0.0625rem;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+</style>

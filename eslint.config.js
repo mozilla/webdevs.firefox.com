@@ -55,6 +55,21 @@ export default defineConfig([
     },
   },
 
+  // The `astro/client-side-ts` processor lints `<script>` blocks as virtual
+  // `*.astro/*.ts` files, which the block above doesn't match. They aren't in
+  // any tsconfig, so `projectService: true` leaks down from the base config as
+  // a provided `programs` and the VS Code ESLint extension reports it as a
+  // parsing error. Lint them without type information.
+  {
+    files: ['**/*.astro/*.ts', '**/*.astro/*.js'],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+    },
+  },
+
   // Config files run in Node, not the browser.
   {
     files: ['*.config.{js,ts,mjs}'],

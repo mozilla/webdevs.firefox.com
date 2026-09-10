@@ -1,0 +1,220 @@
+---
+import { Image } from 'astro:assets';
+import logo from '~/assets/firefox.svg?url';
+import Wordmark from '~/assets/firefox-wordmark.svg';
+
+/** Primary nav, split either side of a divider as in the design. */
+const primaryLinks = [
+  { label: 'Blog', href: '/blog/' },
+  { label: 'Release notes', href: '/release-notes/' },
+  { label: 'Experiments', href: '/experiments/' },
+];
+
+const externalLinks = [
+  { label: 'MDN', href: 'https://developer.mozilla.org/' },
+  {
+    label: 'DevTools',
+    href: 'https://firefox-source-docs.mozilla.org/devtools-user/',
+  },
+  { label: 'Addons', href: 'https://addons.mozilla.org/' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="header">
+  <div class="header-inner wrapper">
+    <a class="brand" href="/">
+      <Image class="brand-logo" src={logo} alt="" width={40} height={40} />
+      <Wordmark
+        class="brand-wordmark"
+        role="img"
+        aria-label="Firefox"
+        width={94}
+        height={21}
+      />
+      <span class="brand-suffix">for Web Developers</span>
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      <ul class="nav-list" role="list">
+        {
+          primaryLinks.map(({ label, href }) => (
+            <li>
+              <a
+                href={href}
+                aria-current={currentPath.startsWith(href) ? 'page' : undefined}
+              >
+                {label}
+              </a>
+            </li>
+          ))
+        }
+        <li role="separator" class="nav-divider"></li>
+        {
+          externalLinks.map(({ label, href }) => (
+            <li>
+              <a href={href}>{label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <a class="cta" href="https://www.firefox.com/">Get Firefox</a>
+  </div>
+</header>
+
+<style>
+  .header {
+    background-color: var(--color-background-main);
+  }
+
+  .header-inner {
+    display: grid;
+    grid-template-areas: 'brand nav cta';
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-24);
+    padding-block: var(--space-8);
+  }
+
+  .brand {
+    grid-area: brand;
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: var(--space-12);
+    text-decoration: none;
+  }
+
+  .brand-logo {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .brand-wordmark {
+    width: auto;
+    height: 1.3125rem;
+    /* The wordmark paths are fill="currentColor" so it follows the scheme. */
+    color: var(--color-heading);
+  }
+
+  .brand-suffix {
+    color: var(--color-heading);
+    /* Trimmed in the design, so the 1.75rem text sits optically on the logo. */
+    text-box: trim-both cap alphabetic;
+    font-size: 1.75rem;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .nav {
+    grid-area: nav;
+    justify-self: end;
+  }
+
+  /* Flex, not grid: the link count is variable and these need to wrap. */
+  .nav-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-16);
+  }
+
+  .nav-list a {
+    color: var(--color-heading);
+    text-box: trim-both cap alphabetic;
+    font-size: var(--text-label-xs-caps);
+    line-height: var(--leading-body-xs);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav-list a:hover {
+    text-decoration: underline;
+  }
+
+  .nav-list a[aria-current='page'] {
+    font-weight: 600;
+  }
+
+  .nav-divider {
+    align-self: stretch;
+    width: 0.0625rem;
+    min-height: 1.125rem;
+    background-color: var(--color-border);
+  }
+
+  .cta {
+    grid-area: cta;
+    text-box: trim-both cap alphabetic;
+    padding: 0.625rem var(--space-16);
+    border-radius: var(--radius-pill);
+    background-color: var(--color-purple-fixed);
+    color: var(--color-white-fixed);
+    font-size: var(--text-label-xs-caps);
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color 150ms ease;
+  }
+
+  .cta:hover {
+    background-color: color-mix(in oklab, var(--color-purple-fixed), black 12%);
+  }
+
+  /* Below the point where the full nav fits beside the brand. */
+  @media (width < 60rem) {
+    .header-inner {
+      grid-template-areas:
+        'brand brand'
+        'nav cta';
+      grid-template-columns: 1fr auto;
+      row-gap: var(--space-12);
+    }
+
+    .nav {
+      justify-self: start;
+    }
+
+    .brand-suffix {
+      font-size: 1.25rem;
+    }
+
+    /* The two link groups end up on separate rows, so the rule between
+       them reads as a stray mark. */
+    .nav-divider {
+      display: none;
+    }
+  }
+
+  /* Narrow enough that "for Web Developers" no longer fits beside the logo. */
+  @media (width < 30rem) {
+    .brand {
+      grid-auto-flow: row;
+      grid-template-areas:
+        'logo wordmark'
+        'suffix suffix';
+      grid-template-columns: auto 1fr;
+      justify-items: start;
+      gap: var(--space-8);
+    }
+
+    .brand-logo {
+      grid-area: logo;
+    }
+
+    .brand-wordmark {
+      grid-area: wordmark;
+    }
+
+    .brand-suffix {
+      grid-area: suffix;
+      font-size: 1.125rem;
+      white-space: normal;
+    }
+  }
+</style>

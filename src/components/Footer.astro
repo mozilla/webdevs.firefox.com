@@ -1,0 +1,218 @@
+---
+/**
+ * Site footer. The "Which version of Firefox is right for me?" CTA that sits
+ * above this in the design is intentionally not included yet.
+ */
+const linkColumns = [
+  {
+    heading: 'Follow Us',
+    groups: [
+      [
+        { label: 'X', href: 'https://x.com/firefoxdevtools' },
+        { label: 'BlueSky', href: 'https://bsky.app/profile/firefox.com' },
+        { label: 'Mastodon', href: 'https://mozilla.social/@firefox' },
+        { label: 'LinkedIn', href: 'https://www.linkedin.com/company/mozilla' },
+      ],
+      [
+        { label: 'YouTube', href: 'https://www.youtube.com/firefoxchannel' },
+        { label: 'TikTok', href: 'https://www.tiktok.com/@firefox' },
+        { label: 'Threads', href: 'https://www.threads.net/@firefox' },
+        { label: 'Instagram', href: 'https://www.instagram.com/firefox/' },
+      ],
+    ],
+  },
+  {
+    heading: 'Firefox Essentials',
+    groups: [
+      [
+        { label: 'RSS', href: '/rss.xml' },
+        { label: 'MDN', href: 'https://developer.mozilla.org/' },
+        {
+          label: 'DevTools',
+          href: 'https://firefox-source-docs.mozilla.org/devtools-user/',
+        },
+        { label: 'Addons', href: 'https://addons.mozilla.org/' },
+      ],
+      [
+        {
+          label: 'WebDriver updates',
+          href: 'https://firefox-source-docs.mozilla.org/testing/geckodriver/',
+        },
+        {
+          label: 'Spidermonkey updates',
+          href: 'https://spidermonkey.dev/',
+        },
+        {
+          label: 'Security updates',
+          href: 'https://www.mozilla.org/security/advisories/',
+        },
+      ],
+    ],
+  },
+];
+
+const legalLinks = [
+  {
+    label: 'Website Privacy Notice',
+    href: 'https://www.mozilla.org/privacy/websites/',
+  },
+  { label: 'Terms of Use', href: 'https://www.mozilla.org/about/legal/terms/' },
+  {
+    label: 'Cookie Policy',
+    href: 'https://www.mozilla.org/privacy/websites/cookies/',
+  },
+  {
+    label: 'Community Participation Guidelines',
+    href: 'https://www.mozilla.org/about/governance/policies/participation/',
+  },
+  {
+    label: 'Logo Trademark Licensing',
+    href: 'https://www.mozilla.org/foundation/trademarks/policy/',
+  },
+];
+---
+
+<footer class="footer">
+  <div class="footer-inner wrapper">
+    <div class="columns">
+      {
+        linkColumns.map(({ heading, groups }) => (
+          <section class="column">
+            <h2 class="column-heading">{heading}</h2>
+            <div class="column-groups">
+              {groups.map((group) => (
+                <ul class="link-list" role="list">
+                  {group.map(({ label, href }) => (
+                    <li>
+                      <a href={href}>{label}</a>
+                    </li>
+                  ))}
+                </ul>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+
+      <section class="column mozilla">
+        <h2 class="column-heading">Powered by Mozilla</h2>
+        <p>
+          <a href="https://connect.mozilla.org/">Ask Us a Question!</a>
+        </p>
+      </section>
+    </div>
+
+    <nav class="legal" aria-label="Legal">
+      <ul class="legal-list" role="list">
+        {
+          legalLinks.map(({ label, href }) => (
+            <li>
+              <a href={href}>{label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background-color: var(--color-black-fixed);
+    color: var(--color-white-fixed);
+  }
+
+  .footer-inner {
+    display: grid;
+    gap: var(--space-40);
+    padding-block: var(--space-32);
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: space-between;
+    gap: var(--space-32);
+  }
+
+  .column {
+    display: grid;
+    align-content: start;
+    gap: var(--space-16);
+  }
+
+  .column-heading {
+    color: inherit;
+    /* The design sets these in Mozilla Text, not the headline face. */
+    font-family: var(--font-mozilla-text);
+    font-size: var(--text-body-sm);
+    font-weight: 700;
+    line-height: var(--leading-body-sm);
+  }
+
+  .column-groups {
+    display: grid;
+    grid-auto-flow: column;
+    gap: var(--space-16);
+  }
+
+  .link-list {
+    display: grid;
+    align-content: start;
+    gap: var(--space-12);
+    min-width: 10rem;
+  }
+
+  .footer a {
+    color: inherit;
+    /* Link items carry trim-both in the design; the headings below do not. */
+    text-box: trim-both cap alphabetic;
+    font-size: var(--text-body-xs);
+    line-height: var(--leading-body-xs);
+    text-decoration: none;
+  }
+
+  .footer a:hover {
+    text-decoration: underline;
+  }
+
+  .mozilla p {
+    font-size: var(--text-body-xs);
+    line-height: var(--leading-body-xs);
+  }
+
+  /* Flex, not grid: a variable number of legal links that need to wrap. */
+  .legal-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-16);
+  }
+
+  .legal-list a {
+    font-size: 0.625rem;
+    font-weight: 500;
+    line-height: var(--leading-label-xs-caps);
+    letter-spacing: 0.02em;
+  }
+
+  @media (width < 64rem) {
+    .columns {
+      grid-template-columns: auto auto;
+      justify-content: start;
+      column-gap: var(--space-40);
+    }
+  }
+
+  @media (width < 48rem) {
+    .column-groups {
+      grid-auto-flow: row;
+      gap: var(--space-12);
+    }
+  }
+
+  @media (width < 40rem) {
+    .columns {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,62 @@
+/**
+ * Design tokens from the "Firefox for Developers | Shared Design" Figma file.
+ * Names mirror the Figma variable names so the two stay easy to reconcile.
+ * The numbers in the spacing and type token names are the Figma pixel
+ * values; the values themselves are rem, where 1rem is 16px.
+ *
+ * Mode-dependent tokens use light-dark(), so they resolve against the
+ * color-scheme set on :root. The "fixed" tokens are identical in both Figma
+ * modes by design, so they are plain values.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Colour — fixed across modes */
+  --color-black-fixed: #15141a;
+  --color-white-fixed: #fff;
+  --color-purple-fixed: #7543e3;
+
+  /* Colour — mode dependent */
+  --color-background-main: light-dark(#fff, #070414);
+  --color-background-spot: light-dark(#f1e7f8, #210340);
+  --color-heading: light-dark(#15141a, #fff);
+  --color-text: light-dark(#42414d, #e4d7fc);
+  --color-border: light-dark(#e4d7fc, #3a0f6e);
+  --color-purple: light-dark(#7543e3, #ad8df0);
+  --color-midnight-purple: light-dark(#210340, #3a0f6e);
+
+  /* Spacing scale */
+  --space-0: 0;
+  --space-8: 0.5rem;
+  --space-12: 0.75rem;
+  --space-16: 1rem;
+  --space-24: 1.5rem;
+  --space-32: 2rem;
+  --space-40: 2.5rem;
+  --space-80: 5rem;
+
+  /* Radii */
+  --radius-pill: 12.5rem;
+
+  /* Type families are wired up by the Astro Fonts API in astro.config.ts,
+     which defines --font-mozilla-text and --font-mozilla-headline. */
+
+  /* Type scale: --text-* pairs with a matching --leading-*. */
+  --text-title-sm: 2rem;
+  --leading-title-sm: 1;
+  --text-title-xs: 1.5rem;
+  --leading-title-xs: 1.1;
+  --text-body-sm: 1rem;
+  --leading-body-sm: 1.4;
+  --text-body-xs: 0.875rem;
+  --leading-body-xs: 1.4;
+  --text-label-xs-caps: 0.75rem;
+  --leading-label-xs-caps: 1.2;
+  --tracking-label-xs-caps: 0.1667em;
+
+  /* Layout */
+  --page-max-width: 90rem;
+  --content-max-width: 88rem;
+  --gutter: var(--space-16);
+}

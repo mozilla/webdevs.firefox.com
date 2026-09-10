@@ -1,5 +1,7 @@
 ---
+import { Font } from 'astro:assets';
 import Head from '~/components/Head.astro';
+import '~/styles/global.css';
 
 interface Props {
   title: string;
@@ -13,6 +15,8 @@ const { title, description, image } = Astro.props;
 <html lang="en">
   <head>
     <Head title={title} description={description} image={image} />
+    <Font cssVariable="--font-mozilla-text" preload={[{ style: 'normal' }]} />
+    <Font cssVariable="--font-mozilla-headline" preload />
   </head>
   <body>
     <slot />

@@ -1,4 +1,6 @@
 ---
+import faviconURL from '~/assets/firefox.svg?url';
+
 interface Props {
   title: string;
   description?: string | undefined;
@@ -14,13 +16,12 @@ const imageURL = image ? new URL(image, Astro.site) : undefined;
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width" />
-<meta name="generator" content={Astro.generator} />
 
 <title>{title}</title>
 {description && <meta name="description" content={description} />}
 <link rel="canonical" href={canonical} />
 
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/svg+xml" href={faviconURL} />
 <link rel="icon" href="/favicon.ico" />
 
 <meta property="og:type" content="website" />

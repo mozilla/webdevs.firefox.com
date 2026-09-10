@@ -1,0 +1,93 @@
+@import './tokens.css';
+
+/*
+ * Modern reset. `revert-layer` in a lower-priority cascade layer lets
+ * component styles win without any specificity games.
+ */
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  :where(body, h1, h2, h3, h4, p, figure, blockquote, dl, dd) {
+    margin: 0;
+  }
+
+  :where(ul, ol):where([role='list']) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  :where(img, picture, svg, video) {
+    display: block;
+    max-width: 100%;
+  }
+
+  :where(button, input, select, textarea) {
+    font: inherit;
+    color: inherit;
+  }
+
+  :where(a) {
+    color: inherit;
+  }
+}
+
+html {
+  /* Keeps in-page anchors clear of the sticky header. */
+  scroll-padding-block-start: var(--space-80);
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+  interpolate-size: allow-keywords;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background-main);
+  color: var(--color-text);
+  font-family: var(--font-mozilla-text);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body-sm);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+:where(h1, h2, h3, h4) {
+  color: var(--color-heading);
+  font-family: var(--font-mozilla-headline);
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+:where(p) {
+  text-wrap: pretty;
+}
+
+/* Visible, consistent focus ring for keyboard users only. */
+:focus-visible {
+  outline: 0.125rem solid var(--color-purple);
+  outline-offset: 0.125rem;
+  border-radius: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Shared page shell: centres content and applies the gutter. */
+.wrapper {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
