@@ -64,7 +64,6 @@
   --tracking-label-xs-caps: 0.1667em;
 
   /* Layout */
-  --page-max-width: 90rem;
   --content-max-width: 88rem;
   --gutter: var(--space-16);
 }

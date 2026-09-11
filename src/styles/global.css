@@ -1,47 +1,58 @@
 @import './tokens.css';
 
-/*
- * Modern reset. `revert-layer` in a lower-priority cascade layer lets
- * component styles win without any specificity games.
- */
 @layer reset {
   *,
   *::before,
   *::after {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  :where(body, h1, h2, h3, h4, p, figure, blockquote, dl, dd) {
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  figure,
+  blockquote,
+  dl,
+  dd {
     margin: 0;
   }
 
-  :where(ul, ol):where([role='list']) {
+  ul[role='list'],
+  ol[role='list'] {
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  :where(img, picture, svg, video) {
+  img,
+  picture,
+  svg,
+  video {
     display: block;
     max-width: 100%;
   }
 
-  :where(button, input, select, textarea) {
+  button,
+  input,
+  select,
+  textarea {
     font: inherit;
     color: inherit;
   }
 
-  :where(a) {
+  a {
     color: inherit;
   }
 }
 
 html {
-  /* Keeps in-page anchors clear of the sticky header. */
-  scroll-padding-block-start: var(--space-80);
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
-  interpolate-size: allow-keywords;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -73,26 +84,9 @@ body {
   border-radius: 0.25rem;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
 /*
- * Shared page shell: centres content and applies the gutter. The cap is the
- * full page width, so the gutter is carved out of it — 90rem less two 1rem
- * gutters leaves --content-max-width, matching the 1408px-wide content in
- * Figma's 1440px frames.
+ * Shared page shell
  */
 .wrapper {
-  width: 100%;
-  max-width: var(--page-max-width);
-  margin-inline: auto;
   padding-inline: var(--gutter);
 }

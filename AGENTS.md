@@ -109,7 +109,7 @@ Don't nest when it hurts:
 - **Don't nest past two levels.** Deep chains make the effective selector
   hard to reconstruct and raise specificity invisibly.
 - **Don't nest siblings.** Rules that merely appear near each other in the
-  markup, like the reset's `:where()` list, stay flat.
+  markup, like the reset's element selectors, stay flat.
 - **Don't nest a component's top-level layout rules into each other**
   just because the elements are nested in the DOM. `.column-heading`
   stays a top-level rule; burying it inside `.column` gains nothing and
@@ -125,8 +125,12 @@ a property and its override.
 - Modern features are welcome and preferred: logical properties, range media
   queries (`@media (width < 60rem)`), `color-mix()`, `text-wrap: balance`,
   `100dvh`, `interpolate-size`.
-- The reset lives in a `@layer reset` using `:where()`, so component styles
-  win without specificity juggling.
+- The reset lives in a `@layer reset`. Unlayered rules beat layered ones
+  whatever their specificity, so component styles win without juggling —
+  the layer does that work on its own and reset rules need no `:where()`.
+  Outside the layer it is still load-bearing: `:where(h1, h2, h3, h4)` and
+  `:where(p)` in `global.css` are unlayered like component styles, so
+  `:where()` is what keeps them overridable.
 - Astro `<style>` blocks are scoped by default — use them for component CSS
   and keep `global.css` for the reset and shared primitives like `.wrapper`.
   Preact components have no such thing, so they use a sibling
