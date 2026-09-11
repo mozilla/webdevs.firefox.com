@@ -32,14 +32,16 @@ const currentPath = Astro.url.pathname;
         width={logo.width}
         height={logo.height}
       />
-      <Wordmark
-        class="brand-wordmark"
-        role="img"
-        aria-label="Firefox"
-        width={94}
-        height={21}
-      />
-      <span class="brand-suffix">for Web Developers</span>
+      <span class="brand-text">
+        <Wordmark
+          class="brand-wordmark"
+          role="img"
+          aria-label="Firefox"
+          width={94}
+          height={21}
+        />
+        <span class="brand-suffix">for Web Developers</span>
+      </span>
     </a>
 
     <nav class="nav" aria-label="Main">
@@ -82,9 +84,6 @@ const currentPath = Astro.url.pathname;
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: var(--space-24);
-    /* Not a spacing token: the design has no 20 on its scale. It is where
-       the Header instance sits in the 1440x page frame (y=20), with the
-       same 20 again before the content below it. */
     padding-block: 1.25rem;
   }
 
@@ -95,6 +94,15 @@ const currentPath = Astro.url.pathname;
     align-items: center;
     gap: var(--space-12);
     text-decoration: none;
+  }
+
+  .brand-text {
+    display: grid;
+    grid-auto-flow: column;
+    /* This aligns to the baseline - since the wordmark has no descender
+       and the suffix is trimmed to the alphabetic baseline */
+    align-items: end;
+    gap: 0.53em;
   }
 
   .brand-logo {
@@ -202,26 +210,14 @@ const currentPath = Astro.url.pathname;
 
   /* Narrow enough that "for Web Developers" no longer fits beside the logo. */
   @media (width < 30rem) {
-    .brand {
+    .brand-text {
       grid-auto-flow: row;
-      grid-template-areas:
-        'logo wordmark'
-        'suffix suffix';
-      grid-template-columns: auto 1fr;
+      align-items: start;
       justify-items: start;
       gap: var(--space-8);
     }
 
-    .brand-logo {
-      grid-area: logo;
-    }
-
-    .brand-wordmark {
-      grid-area: wordmark;
-    }
-
     .brand-suffix {
-      grid-area: suffix;
       font-size: 1.125rem;
       white-space: normal;
     }
