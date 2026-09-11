@@ -3,12 +3,21 @@ import { defineConfig, fontProviders } from 'astro/config';
 import preact from '@astrojs/preact';
 import mdx from '@astrojs/mdx';
 
+import { writeCssModuleTypes } from './lib/css-module-types.ts';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://webdevs.firefox.com',
   integrations: [preact(), mdx()],
   build: {
     format: 'preserve',
+  },
+  vite: {
+    css: {
+      modules: {
+        getJSON: writeCssModuleTypes,
+      },
+    },
   },
   fonts: [
     {

@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "astro dev",
     "lint": "eslint .",
-    "check": "pnpm run format:check; pnpm run lint; astro check",
-    "build": "astro check && astro build",
+    "check": "pnpm run format:check; pnpm run lint; pnpm run build",
+    "build": "astro build && astro check",
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write .",
@@ -22,6 +22,7 @@
     "@astrojs/preact": "^6.0.5",
     "@eslint/js": "^10.0.1",
     "@eslint/markdown": "^8.0.3",
+    "@types/node": "^22.20.2",
     "astro": "^7.3.2",
     "eslint": "^10.10.0",
     "eslint-plugin-astro": "^3.1.0",
