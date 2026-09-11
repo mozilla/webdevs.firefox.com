@@ -8,7 +8,7 @@ import path from 'node:path';
  *
  * Astro's built-in `*.module.css` type is an index signature, so under
  * `noUncheckedIndexedAccess` every lookup is possibly-undefined; generating
- * the real keys keeps components free of non-null assertions and makes a
+ * the real names keeps components free of non-null assertions and makes a
  * typo in a class name a type error.
  *
  * The output is gitignored, like any other build artifact — a checked-in
@@ -18,21 +18,42 @@ import path from 'node:path';
  * clean tree first would fall back to Astro's permissive `*.module.css`
  * wildcard and pass without really checking anything.
  *
+ * Only named exports are declared — deliberately no default. Named imports
+ * are what let a bundler drop the classes a module doesn't use, which matters
+ * if any of this is ever shipped to the client, and leaving the default
+ * undeclared makes `import styles from …` a type error rather than a choice.
+ *
+ * A consequence is that class names have to be valid JS identifiers.
+ * Kebab-case ones are listed in a comment instead of silently vanishing, so
+ * the fix (rename to camelCase) is obvious at the point of use.
+ *
  * Synchronous because Vite's `getJSON` is typed as returning void — a promise
  * returned here would not be awaited.
  */
+
+/** Matches a class name usable as a JS binding. */
+const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
+
 export function writeCssModuleTypes(
   cssFileName: string,
   classes: Record<string, string>,
 ): void {
-  const body = Object.keys(classes)
-    .toSorted((a, b) => a.localeCompare(b))
-    .map((name) => `  readonly ${name}: string;`)
+  const names = Object.keys(classes).toSorted((a, b) => a.localeCompare(b));
+  const exportable = names.filter((name) => IDENTIFIER.test(name));
+  const skipped = names.filter((name) => !IDENTIFIER.test(name));
+
+  const body = exportable
+    .map((name) => `export const ${name}: string;`)
     .join('\n');
+
+  const note =
+    skipped.length > 0
+      ? `\n// Not exported — rename to camelCase to use: ${skipped.join(', ')}\n`
+      : '';
 
   writeFileSync(
     `${cssFileName}.d.ts`,
     `// Generated from ${path.basename(cssFileName)} — do not edit.\n` +
-      `declare const classes: {\n${body}\n};\n\nexport default classes;\n`,
+      `${note}${body}\n`,
   );
 }

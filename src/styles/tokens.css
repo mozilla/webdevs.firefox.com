@@ -16,12 +16,15 @@
   --color-black-fixed: #15141a;
   --color-white-fixed: #fff;
   --color-purple-fixed: #7543e3;
+  --color-dark-purple-fixed: #3a0f6e;
+  --color-midnight-purple-fixed: #210340;
 
   /* Colour — mode dependent */
   --color-background-main: light-dark(#fff, #070414);
   --color-background-spot: light-dark(#f1e7f8, #210340);
   --color-heading: light-dark(#15141a, #fff);
   --color-text: light-dark(#42414d, #e4d7fc);
+  --color-disabled-text: light-dark(#8c8b92, #575661);
   --color-border: light-dark(#e4d7fc, #3a0f6e);
   --color-purple: light-dark(#7543e3, #ad8df0);
   --color-midnight-purple: light-dark(#210340, #3a0f6e);
@@ -31,6 +34,7 @@
   --space-8: 0.5rem;
   --space-12: 0.75rem;
   --space-16: 1rem;
+  --space-20: 1.25rem;
   --space-24: 1.5rem;
   --space-32: 2rem;
   --space-40: 2.5rem;
@@ -51,6 +55,10 @@
   --leading-body-sm: 1.4;
   --text-body-xs: 0.875rem;
   --leading-body-xs: 1.4;
+  --text-button-lg: 1.5rem;
+  --text-button-md: 1.25rem;
+  --text-button-sm: 1.125rem;
+  --leading-button: 1;
   --text-label-xs-caps: 0.75rem;
   --leading-label-xs-caps: 1.2;
   --tracking-label-xs-caps: 0.1667em;

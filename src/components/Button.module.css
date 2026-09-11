@@ -1,0 +1,121 @@
+/*
+ * Styles for Button.tsx. A CSS Module rather than an Astro `<style>` block,
+ * because `.tsx` has no compiler-scoped styles — this keeps the scoping while
+ * letting the component be used from both Astro and Preact.
+ */
+
+.button {
+  display: grid;
+  grid-auto-flow: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
+  /* The design's variants carry 1.5rem chevron icons, which set the height
+     of the content row — taller than the trimmed text. Giving the row that
+     height keeps a text-only button the same size as one with icons. */
+  grid-auto-rows: minmax(var(--button-content-height), auto);
+  border: 0.125rem solid transparent;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mozilla-text);
+  font-weight: 600;
+  line-height: var(--leading-button);
+  text-align: center;
+  text-decoration: none;
+  text-box: trim-both cap alphabetic;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+
+  /* The focus variants draw the ring 0.25rem outside the button, which is
+     what the global focus style already does — it only needs rounding to
+     match the pill. */
+  &:focus-visible {
+    border-radius: var(--radius-pill);
+  }
+}
+
+/* Sizes. Padding is the design's less the 0.125rem border every variant
+   carries, so filled and outlined buttons come out the same height. */
+.sizeLarge {
+  --button-content-height: 1.5rem;
+
+  padding: calc(var(--space-20) - 0.125rem) calc(var(--space-32) - 0.125rem);
+  font-size: var(--text-button-lg);
+}
+
+.sizeMedium {
+  --button-content-height: 1.5rem;
+
+  padding: calc(var(--space-16) - 0.125rem) calc(var(--space-24) - 0.125rem);
+  font-size: var(--text-button-md);
+}
+
+.sizeSmall {
+  --button-content-height: 1.5rem;
+
+  padding: calc(var(--space-8) - 0.125rem) calc(var(--space-24) - 0.125rem);
+  font-size: var(--text-button-sm);
+}
+
+/* Not in the component set: the header CTA is the same button drawn below
+   Small. Its 0.625rem block padding is positional, not on the spacing
+   scale, and it has no icons to set a content height. */
+.sizeCompact {
+  --button-content-height: 0;
+
+  padding: calc(0.625rem - 0.125rem) calc(var(--space-16) - 0.125rem);
+  font-size: var(--text-label-xs-caps);
+}
+
+/*
+ * Buttons are deliberately identical in both colour schemes: every button
+ * on a page in Figma binds Purple Fixed, and the dark Home frame renders
+ * them the same purple as the light one. Hence the -fixed tokens
+ * throughout rather than the mode-dependent --color-purple.
+ */
+.filled {
+  background-color: var(--color-purple-fixed);
+  color: var(--color-white-fixed);
+
+  &:hover {
+    background-color: var(--color-dark-purple-fixed);
+  }
+
+  &:active {
+    background-color: var(--color-midnight-purple-fixed);
+  }
+}
+
+.outlined {
+  border-color: var(--color-purple-fixed);
+  background-color: transparent;
+  color: var(--color-heading);
+
+  &:hover {
+    border-color: var(--color-purple-fixed);
+    background-color: var(--color-purple-fixed);
+    color: var(--color-white-fixed);
+  }
+
+  &:active {
+    border-color: var(--color-midnight-purple-fixed);
+    background-color: var(--color-midnight-purple-fixed);
+    color: var(--color-white-fixed);
+  }
+}
+
+/* Disabled wins over hover and active, so it comes last. `aria-disabled`
+   covers the link case, where there is no `:disabled`. */
+.button:disabled,
+.button[aria-disabled='true'] {
+  background-color: var(--color-background-spot);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+
+  &.outlined {
+    border-color: var(--color-background-spot);
+    background-color: transparent;
+  }
+}

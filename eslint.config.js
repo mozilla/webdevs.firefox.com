@@ -6,7 +6,7 @@ import unicorn from 'eslint-plugin-unicorn';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-const codeFiles = ['**/*.{js,mjs,cjs,ts,mts,cts,astro}'];
+const codeFiles = ['**/*.{js,mjs,cjs,ts,mts,cts,tsx,astro}'];
 
 export default defineConfig([
   {

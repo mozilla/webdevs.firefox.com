@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "astro dev",
     "lint": "eslint .",
-    "check": "pnpm run format:check; pnpm run lint; pnpm run build",
+    "check": "pnpm run format:check; pnpm run build; pnpm run lint",
     "build": "astro build && astro check",
     "preview": "astro preview",
     "astro": "astro",

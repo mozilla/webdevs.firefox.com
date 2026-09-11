@@ -1,4 +1,5 @@
 ---
+import Button from '~/components/Button.tsx';
 import logo from '~/assets/firefox.svg';
 import Wordmark from '~/assets/firefox-wordmark.svg';
 
@@ -71,7 +72,9 @@ const currentPath = Astro.url.pathname;
       </ul>
     </nav>
 
-    <a class="cta" href="https://www.firefox.com/">Get Firefox</a>
+    <Button class="cta" size="compact" href="https://www.firefox.com/">
+      Get Firefox
+    </Button>
   </div>
 </header>
 
@@ -213,25 +216,8 @@ const currentPath = Astro.url.pathname;
     }
   }
 
+  /* Placement only — the button's own styling lives in Button.module.css. */
   .cta {
     grid-area: cta;
-    text-box: trim-both cap alphabetic;
-    padding: 0.625rem var(--space-16);
-    border-radius: var(--radius-pill);
-    background-color: var(--color-purple-fixed);
-    color: var(--color-white-fixed);
-    font-size: var(--text-label-xs-caps);
-    font-weight: 600;
-    line-height: 1;
-    text-decoration: none;
-    transition: background-color 150ms ease;
-
-    &:hover {
-      background-color: color-mix(
-        in oklab,
-        var(--color-purple-fixed),
-        black 12%
-      );
-    }
   }
 </style>
