@@ -47,6 +47,24 @@
   a {
     color: inherit;
   }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, consistent focus ring for keyboard users only. */
+  :focus-visible {
+    outline: 0.125rem solid var(--color-purple);
+    outline-offset: 0.125rem;
+    border-radius: 0.25rem;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
 }
 
 html {
@@ -64,24 +82,6 @@ body {
   line-height: var(--leading-body-sm);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-}
-
-:where(h1, h2, h3, h4) {
-  color: var(--color-heading);
-  font-family: var(--font-mozilla-headline);
-  font-weight: 600;
-  text-wrap: balance;
-}
-
-:where(p) {
-  text-wrap: pretty;
-}
-
-/* Visible, consistent focus ring for keyboard users only. */
-:focus-visible {
-  outline: 0.125rem solid var(--color-purple);
-  outline-offset: 0.125rem;
-  border-radius: 0.25rem;
 }
 
 /*
