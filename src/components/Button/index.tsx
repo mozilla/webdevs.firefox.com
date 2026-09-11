@@ -1,6 +1,6 @@
 import type { FunctionComponent } from 'preact';
 
-import * as styles from '~/components/Button.module.css';
+import * as styles from '~/components/Button/index.module.css';
 
 /**
  * The Buttons component set from Figma (node `43:6818`), which crosses

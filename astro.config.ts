@@ -13,6 +13,18 @@ export default defineConfig({
     format: 'preserve',
   },
   vite: {
+    resolve: {
+      extensions: [
+        '.astro',
+        '.mjs',
+        '.js',
+        '.mts',
+        '.ts',
+        '.jsx',
+        '.tsx',
+        '.json',
+      ],
+    },
     css: {
       modules: {
         getJSON: writeCssModuleTypes,
