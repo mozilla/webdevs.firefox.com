@@ -13,8 +13,8 @@ Astro static site for Firefox's web developer audience. Built from the
 | `pnpm format` | Write Prettier formatting                             |
 
 The build runs before both `astro check` and ESLint, because it generates the
-CSS Module declarations that their type-aware rules read — see "Shared
-components". CI is ordered the same way.
+CSS Module declarations that their type-aware rules read — see
+`lib/css-module-types.ts`. CI is ordered the same way.
 
 pnpm is the package manager and the Node version is pinned in
 `package.json`/`.npmrc` — use `corepack enable` rather than a global pnpm.
@@ -68,13 +68,27 @@ stay reconcilable — don't rename them, and don't hardcode a value that has a
 token. The numbers in the spacing and type token names are Figma's pixel
 values, while the values themselves are rem.
 
-Colours that differ between light and dark use `light-dark()`, with
-`color-scheme: light dark` set on `:root`. Tokens named `*-fixed` are
-identical in both Figma modes and are plain values — the footer is
-deliberately dark in both schemes because it uses `--color-black-fixed`.
+Mode-dependent colours use `light-dark()`, with `color-scheme: light dark`
+set on `:root`. Where a **whole subtree** should look the same in both
+schemes, prefer pinning its `color-scheme` over a second set of values: the
+footer is `color-scheme: dark` plus `--color-background-main` and
+`--color-heading`, read the normal way round, so the scheme is stated once
+instead of being encoded into every colour.
+
+That only works when every colour on the element moves together, which is why
+`--color-purple-fixed` and `--color-white-fixed` remain plain values. A button
+pairs a fixed purple fill with a mode-dependent label (`--color-heading` on
+the outlined style) and a mode-dependent disabled state on the same element —
+one element gets one `color-scheme`, so pinning it would freeze the label to
+near-black on a dark page.
 
 Get dark values from the dark Home panel (node `42:3623`) via
-`get_variable_defs`. Never invent them.
+`get_variable_defs`. Never invent them. Where the design genuinely has no
+value — Figma's pages show buttons only at rest — derive one from a token
+with `color-mix()` rather than picking a hex, and check the result: the
+buttons' hover and pressed fills darken in light mode and lighten in dark,
+because a darkened fill on the near-black dark page drops to 1.5:1 against
+it, while lightening past ~16% white puts the white label under 4.5:1.
 
 ### Vertical metrics trim
 
@@ -155,91 +169,56 @@ a property and its override.
 
 ## Shared components
 
-A component used from both Astro and Preact is written as Preact, in `.tsx`.
-Astro can render Preact, but not the reverse, so `Button.tsx` is importable
-from either. Without a `client:*` directive it is rendered to HTML at build
-time and ships no JavaScript — the Preact chunks Vite emits stay unreferenced
-and the browser never fetches them. Keep it that way: these components hold
-no state and take no event handlers.
+A component used from both Astro and Preact is written as Preact, in `.tsx` —
+Astro can render Preact, but not the reverse, so `Button/index.tsx` is
+importable from either. Without a `client:*` directive it renders to HTML at
+build time and ships no JavaScript: the Preact chunks Vite emits stay
+unreferenced and the browser never fetches them. Keep it that way — these
+components hold no state and take no event handlers.
 
 Type the function as `FunctionComponent<Props>` rather than annotating the
-return type:
-
-```tsx
-const Button: FunctionComponent<Props> = ({ size = 'medium', ...rest }) => { … };
-export default Button;
-```
-
-`FunctionComponent` wraps props in `RenderableProps`, which supplies
-`children`, `key` and `ref` — so `Props` should not declare `children`
-itself. Name the class prop `class`, not `className`; Preact accepts both and
-`class` reads naturally from Astro call sites.
+return type; it wraps props in `RenderableProps`, which supplies `children`,
+`key` and `ref`, so `Props` should not declare `children` itself. Name the
+class prop `class`, not `className` — Preact accepts both, and `class` reads
+naturally from Astro call sites. Neither of these produces a type error if you
+get it wrong, unlike most of what follows.
 
 Styles go in a sibling `*.module.css`, since `.tsx` has no scoped `<style>`.
-Astro passes its `data-astro-cid-*` scope hash through to the component's root
-element, so a parent's scoped rule (`.cta { grid-area: cta }`) still reaches
-it — keep layout and placement in the parent, and the component's own
-appearance in its module.
-
-Import the module as a namespace, not as a default object:
+Import it as a namespace rather than with bare named imports, so the `styles.`
+prefix marks each use site as a class name rather than a local:
 
 ```tsx
-import * as styles from '~/components/Button.module.css';
+import * as styles from '~/components/Button/index.module.css';
 ```
 
-This binds the named exports, so a bundler can drop the classes a module
-doesn't use — which matters for any component that later ships to the client.
-The `styles.` prefix is worth keeping over bare named imports: it makes clear
-at each use site that the value is a class name rather than a local.
+Astro passes its `data-astro-cid-*` scope hash through to the component's root
+element, so a parent's scoped rule (`.cta { grid-area: cta }`) still reaches
+it — keep layout and placement in the parent, the component's own appearance
+in its module.
 
-The generated declarations deliberately contain no default export, so there
-is no object holding every class to import by accident.
-
-Class names must be valid JS identifiers — camelCase, as in `sizeLarge`.
-A kebab-case class gets no export at all; it is named in a comment at the top
-of the generated file, and the fix is to rename it.
-
-The `.d.ts` files beside each `*.module.css` are generated by
-`lib/css-module-types.ts`, wired in as Vite's `css.modules.getJSON`. They are
-gitignored build artifacts — never edit or commit them. Both `astro check`
-and ESLint's type-aware rules only read declarations already on disk, so the
-build has to run before either: check first and it falls back to Astro's
-permissive `*.module.css` wildcard, passing without really checking anything,
-while ESLint reports the import as an error-typed value.
+The `.d.ts` beside each `*.module.css` is generated by
+`lib/css-module-types.ts`. Never edit or commit one; that file's doc comment
+covers why they are gitignored, why there is deliberately no default export,
+why class names must be camelCase, and why the build has to run before
+`astro check` and ESLint.
 
 ## Working with Figma
 
-Load the `figma-design-to-code` skill before calling `get_design_context`.
+The design lives in the "Firefox for Developers | Shared Design" Figma file.
+Before touching it — implementing a frame, measuring spacing, checking an
+existing component against the design, or adding a colour token that needs a
+dark value — load the **`figma-shared-design`** skill
+(`.claude/skills/figma-shared-design/`). It holds the file key, the node IDs
+for the light and dark Home pages, and the traps in `get_design_context`,
+`get_variable_defs` and oversized MCP results that have each cost a wrong
+implementation once already. `figma-design-to-code` is still the skill to
+load before calling `get_design_context` itself.
 
-- File key: `GULnZuu07g7faYJ7wE1V4v`. The light Home page is node `42:1742`,
-  the dark equivalent `42:3623`. Node `42:1079` is the whole "Final Pages"
-  canvas and is too large to fetch in one call — target individual frames.
-- Returned React/Tailwind is a _reference_. Translate it into Astro with
-  tokens; never paste it, and never install Tailwind.
-- The generated code uses absolute positioning. Rebuild layouts properly with
-  grid rather than transcribing offsets, and expect small height differences
-  from the Figma frame as a result.
-- **A component's own node says nothing about where it sits on the page.**
-  `get_design_context` on an instance returns it in isolation, so the margins
-  around it are simply absent from the output — and absent reads as zero, not
-  as unknown. Before styling a component's outer spacing, call `get_metadata`
-  on the parent frame and derive the offsets from the child's `x`/`y`/`width`
-  against the parent's width. On the 1440-wide Home frame the Header instance
-  is at `x=16, y=20, width=1408`: a 16 page gutter and 20 above the header,
-  neither of which appears anywhere in the Header node itself.
-- The gutter belongs inside the page cap, not outside it. `.wrapper` is capped
-  at `--page-max-width` (90rem) so `--gutter` is carved out of it, leaving
-  `--content-max-width` (88rem). Capping at 88rem _and_ padding would inset
-  the content twice.
-- If a measured value has no token, that is a signal, not a rounding problem.
-  The spacing scale is 0/8/12/16/24/32/40/80, so a 20 is positional — write
-  the literal `1.25rem` with a comment. Never snap to the nearest token to
-  make a value look tokenised.
-- Download image and SVG assets into `src/assets/` and commit them. Figma's
-  asset URLs expire after about 7 days.
-- Icons and logos exported from Figma may have hardcoded fills. Swap them for
-  `currentColor` so they follow the colour scheme — the Firefox wordmark
-  shipped with the light-mode heading colour baked in.
+Two rules are worth stating here because they bind even when you never open
+Figma: never invent a dark-mode value, and never snap a measured value to the
+nearest token to make it look tokenised — the spacing scale is
+0/8/12/16/24/32/40/80, so a 20 is positional and gets a literal `1.25rem`
+with a comment.
 
 ## Not yet built
 
