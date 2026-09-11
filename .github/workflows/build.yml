@@ -20,6 +20,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm run lint
-
+      # Build first: it generates the CSS Module declarations that ESLint's
+      # type-aware rules and `astro check` both read.
       - run: pnpm run build
+
+      - run: pnpm run lint
