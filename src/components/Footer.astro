@@ -120,6 +120,19 @@ const legalLinks = [
   .footer {
     background-color: var(--color-black-fixed);
     color: var(--color-white-fixed);
+
+    & a {
+      color: inherit;
+      /* Link items carry trim-both in the design; the headings below do not. */
+      text-box: trim-both cap alphabetic;
+      font-size: var(--text-body-xs);
+      line-height: var(--leading-body-xs);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   .footer-inner {
@@ -133,6 +146,16 @@ const legalLinks = [
     grid-template-columns: auto auto auto;
     justify-content: space-between;
     gap: var(--space-32);
+
+    @media (width < 64rem) {
+      grid-template-columns: auto auto;
+      justify-content: start;
+      column-gap: var(--space-40);
+    }
+
+    @media (width < 40rem) {
+      grid-template-columns: 1fr;
+    }
   }
 
   .column {
@@ -154,6 +177,12 @@ const legalLinks = [
     display: grid;
     grid-auto-flow: column;
     gap: var(--space-16);
+
+    /* Too narrow for two link columns side by side; stack the groups. */
+    @media (width < 48rem) {
+      grid-auto-flow: row;
+      gap: var(--space-12);
+    }
   }
 
   .link-list {
@@ -163,56 +192,22 @@ const legalLinks = [
     min-width: 10rem;
   }
 
-  .footer a {
-    color: inherit;
-    /* Link items carry trim-both in the design; the headings below do not. */
-    text-box: trim-both cap alphabetic;
-    font-size: var(--text-body-xs);
-    line-height: var(--leading-body-xs);
-    text-decoration: none;
-  }
-
-  .footer a:hover {
-    text-decoration: underline;
-  }
-
   .mozilla p {
     font-size: var(--text-body-xs);
     line-height: var(--leading-body-xs);
   }
 
-  /* Flex, not grid: a variable number of legal links that need to wrap. */
   .legal-list {
+    /* Flex, not grid: a variable number of legal links that need to wrap. */
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-16);
-  }
 
-  .legal-list a {
-    font-size: 0.625rem;
-    font-weight: 500;
-    line-height: var(--leading-label-xs-caps);
-    letter-spacing: 0.02em;
-  }
-
-  @media (width < 64rem) {
-    .columns {
-      grid-template-columns: auto auto;
-      justify-content: start;
-      column-gap: var(--space-40);
-    }
-  }
-
-  @media (width < 48rem) {
-    .column-groups {
-      grid-auto-flow: row;
-      gap: var(--space-12);
-    }
-  }
-
-  @media (width < 40rem) {
-    .columns {
-      grid-template-columns: 1fr;
+    & a {
+      font-size: 0.625rem;
+      font-weight: 500;
+      line-height: var(--leading-label-xs-caps);
+      letter-spacing: 0.02em;
     }
   }
 </style>

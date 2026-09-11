@@ -83,6 +83,39 @@ Apply it only to nodes that actually carry the flag. In the footer the link
 items are trimmed but the column headings are not. `text-box` support can be
 assumed; no `@supports` guard is needed.
 
+### Nest where it aids readability
+
+Use CSS nesting to keep a component's rules together, but not as a way to
+mirror the DOM. Nest when it removes a repeated selector or moves a rule
+next to the thing it modifies:
+
+- **States and attribute variants** — `&:hover`, `&:not(:focus-visible)`,
+  `&[aria-current='page']` go inside the base rule. They are never read
+  independently of it.
+- **Media query overrides** — put the `@media` block inside the rule it
+  overrides, so a component's responsive behaviour reads top to bottom in
+  one place instead of being scattered across breakpoint blocks at the
+  bottom of the file. Keep the breakpoint comment with the block.
+- **Descendants tied to one parent** — `.footer { & a { … } }` where the
+  selector only ever means "a link in the footer". Use the explicit `&`
+  rather than a bare `a`, so the selector reads as a nested one at a glance.
+
+Don't nest when it hurts:
+
+- **Don't nest past two levels.** Deep chains make the effective selector
+  hard to reconstruct and raise specificity invisibly.
+- **Don't nest siblings.** Rules that merely appear near each other in the
+  markup, like the reset's `:where()` list, stay flat.
+- **Don't nest a component's top-level layout rules into each other**
+  just because the elements are nested in the DOM. `.column-heading`
+  stays a top-level rule; burying it inside `.column` gains nothing and
+  makes it harder to find.
+
+Grouping breakpoints per rule does mean the same `@media` condition is
+written more than once. That is the intended trade: the duplication is in
+the condition, which is cheap to read, rather than in the distance between
+a property and its override.
+
 ### Other conventions
 
 - Modern features are welcome and preferred: logical properties, range media
@@ -132,7 +165,7 @@ Load the `figma-design-to-code` skill before calling `get_design_context`.
   neither of which appears anywhere in the Header node itself.
 - The gutter belongs inside the page cap, not outside it. `.wrapper` is capped
   at `--page-max-width` (90rem) so `--gutter` is carved out of it, leaving
-  `--content-max-width` (88rem). Capping at 88rem *and* padding would inset
+  `--content-max-width` (88rem). Capping at 88rem _and_ padding would inset
   the content twice.
 - If a measured value has no token, that is a signal, not a rounding problem.
   The spacing scale is 0/8/12/16/24/32/40/80, so a 20 is positional — write

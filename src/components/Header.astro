@@ -80,8 +80,8 @@ const currentPath = Astro.url.pathname;
     background-color: var(--color-background-main);
   }
 
-  /* Mobile: brand and CTA share the first row, the nav takes the second. */
   .header-inner {
+    /* Mobile: brand and CTA share the first row, the nav takes the second. */
     display: grid;
     grid-template-areas:
       'brand cta'
@@ -91,6 +91,13 @@ const currentPath = Astro.url.pathname;
     column-gap: var(--space-24);
     row-gap: var(--space-12);
     padding-block: 1.25rem;
+
+    /* Wide enough for the full nav to fit beside the brand. */
+    @media (width >= 65rem) {
+      grid-template-areas: 'brand nav cta';
+      grid-template-columns: auto 1fr auto;
+      row-gap: var(--space-0);
+    }
   }
 
   .brand {
@@ -103,17 +110,26 @@ const currentPath = Astro.url.pathname;
     text-decoration: none;
   }
 
+  .brand-logo {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
   .brand-text {
     display: grid;
     /* Stacked by default: the wordmark sits above the suffix, both flush to
        the inline start so they share an edge rather than a baseline. */
     justify-items: start;
     gap: var(--space-8);
-  }
 
-  .brand-logo {
-    width: 2.5rem;
-    height: 2.5rem;
+    /* Wide enough for "for Web Devs" to sit beside the wordmark. */
+    @media (width >= 32rem) {
+      grid-auto-flow: column;
+      /* This aligns to the baseline - since the wordmark has no descender
+         and the suffix is trimmed to the alphabetic baseline */
+      align-items: end;
+      gap: 0.53em;
+    }
   }
 
   .brand-wordmark {
@@ -132,52 +148,69 @@ const currentPath = Astro.url.pathname;
     line-height: 1;
     letter-spacing: -0.02em;
     white-space: nowrap;
+
+    @media (width >= 32rem) {
+      font-size: 1.75rem;
+    }
   }
 
   /* Hiding the middle of "Developers" shortens it to "Devs", so the wording
      is only written once. */
   .brand-suffix-full {
     display: none;
+
+    /* Wide enough to spell out "Developers". */
+    @media (width >= 40rem) {
+      display: revert;
+    }
   }
 
   .nav {
     grid-area: nav;
     justify-self: start;
+
+    @media (width >= 65rem) {
+      justify-self: end;
+    }
   }
 
-  /* Flex, not grid: the link count is variable and these need to wrap. */
   .nav-list {
+    /* Flex, not grid: the link count is variable and these need to wrap. */
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0 var(--space-16);
+
+    & a {
+      color: var(--color-heading);
+      text-box: trim-both cap alphabetic;
+      font-size: var(--text-label-xs-caps);
+      line-height: var(--leading-body-xs);
+      text-decoration: none;
+      white-space: nowrap;
+
+      &:hover {
+        text-decoration: underline;
+      }
+
+      &[aria-current='page'] {
+        font-weight: 600;
+      }
+    }
   }
 
-  .nav-list a {
-    color: var(--color-heading);
-    text-box: trim-both cap alphabetic;
-    font-size: var(--text-label-xs-caps);
-    line-height: var(--leading-body-xs);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .nav-list a:hover {
-    text-decoration: underline;
-  }
-
-  .nav-list a[aria-current='page'] {
-    font-weight: 600;
-  }
-
-  /* On the narrow layout the two link groups can end up on separate rows,
-     where the rule between them reads as a stray mark. */
   .nav-divider {
+    /* On the narrow layout the two link groups can end up on separate rows,
+       where the rule between them reads as a stray mark. */
     display: none;
     align-self: stretch;
     width: 0.0625rem;
     min-height: 1.125rem;
     background-color: var(--color-border);
+
+    @media (width >= 30rem) {
+      display: revert;
+    }
   }
 
   .cta {
@@ -192,50 +225,13 @@ const currentPath = Astro.url.pathname;
     line-height: 1;
     text-decoration: none;
     transition: background-color 150ms ease;
-  }
 
-  .cta:hover {
-    background-color: color-mix(in oklab, var(--color-purple-fixed), black 12%);
-  }
-
-  @media (width >= 30rem) {
-    .nav-divider {
-      display: revert;
-    }
-  }
-
-  /* Wide enough for "for Web Devs" to sit beside the wordmark. */
-  @media (width >= 32rem) {
-    .brand-text {
-      grid-auto-flow: column;
-      /* This aligns to the baseline - since the wordmark has no descender
-         and the suffix is trimmed to the alphabetic baseline */
-      align-items: end;
-      gap: 0.53em;
-    }
-
-    .brand-suffix {
-      font-size: 1.75rem;
-    }
-  }
-
-  /* Wide enough to spell out "Developers". */
-  @media (width >= 40rem) {
-    .brand-suffix-full {
-      display: revert;
-    }
-  }
-
-  /* Wide enough for the full nav to fit beside the brand. */
-  @media (width >= 65rem) {
-    .header-inner {
-      grid-template-areas: 'brand nav cta';
-      grid-template-columns: auto 1fr auto;
-      row-gap: var(--space-0);
-    }
-
-    .nav {
-      justify-self: end;
+    &:hover {
+      background-color: color-mix(
+        in oklab,
+        var(--color-purple-fixed),
+        black 12%
+      );
     }
   }
 </style>
