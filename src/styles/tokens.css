@@ -5,19 +5,21 @@
  * values; the values themselves are rem, where 1rem is 16px.
  *
  * Mode-dependent tokens use light-dark(), so they resolve against the
- * color-scheme set on :root. The "fixed" tokens are identical in both Figma
- * modes by design, so they are plain values.
+ * color-scheme in effect. Where a whole subtree should look the same in both
+ * schemes it sets its own color-scheme instead — the footer does this.
+ *
+ * That only works when every colour on the element moves together, so the
+ * two tokens Figma marks Fixed stay plain values: buttons pair a fixed
+ * purple fill with a mode-dependent label and disabled state on the one
+ * element, which a pinned color-scheme cannot express.
  */
 
 :root {
   color-scheme: light dark;
 
   /* Colour — fixed across modes */
-  --color-black-fixed: #15141a;
-  --color-white-fixed: #fff;
   --color-purple-fixed: #7543e3;
-  --color-dark-purple-fixed: #3a0f6e;
-  --color-midnight-purple-fixed: #210340;
+  --color-white-fixed: #fff;
 
   /* Colour — mode dependent */
   --color-background-main: light-dark(#fff, #070414);

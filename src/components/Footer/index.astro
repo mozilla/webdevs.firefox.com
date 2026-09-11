@@ -118,8 +118,11 @@ const legalLinks = [
 
 <style>
   .footer {
-    background-color: var(--color-black-fixed);
-    color: var(--color-white-fixed);
+    /* Dark in both schemes by design, so it sets its own color-scheme and
+       then uses the mode-dependent tokens the normal way round. */
+    color-scheme: dark;
+    background-color: var(--color-background-main);
+    color: var(--color-heading);
 
     & a {
       color: inherit;

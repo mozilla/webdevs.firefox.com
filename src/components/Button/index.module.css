@@ -5,6 +5,18 @@
  */
 
 .button {
+  /* Both styles draw the same purple, so it and its derived states are
+     declared once here — see the note above .filled for the derivation. */
+  --button-purple: var(--color-purple-fixed);
+  --button-purple-hover: light-dark(
+    color-mix(in oklab, var(--button-purple), #000 40%),
+    color-mix(in oklab, var(--button-purple), #fff 8%)
+  );
+  --button-purple-active: light-dark(
+    color-mix(in oklab, var(--button-purple), #000 60%),
+    color-mix(in oklab, var(--button-purple), #fff 16%)
+  );
+
   display: grid;
   grid-auto-flow: column;
   align-items: center;
@@ -70,38 +82,50 @@
 }
 
 /*
- * Buttons are deliberately identical in both colour schemes: every button
- * on a page in Figma binds Purple Fixed, and the dark Home frame renders
- * them the same purple as the light one. Hence the -fixed tokens
- * throughout rather than the mode-dependent --color-purple.
+ * Every button instance on the Home and article frames binds Purple Fixed
+ * and White Fixed in both Figma modes, so the resting fill does not shift
+ * with the colour scheme. (The Buttons component set binds the mode-dependent
+ * Purple instead, but the pages are what we are building.)
+ *
+ * The pages only ever show the resting state, so hover and pressed are
+ * derived from the fill rather than specified. The direction has to flip per
+ * scheme: darkening works in light, but on the near-black dark page a
+ * darkened fill sinks into it — the light spec's #3a0f6e is 1.5:1 against
+ * #070414. Hence light-dark() around the whole mix rather than one shared
+ * shade, which also lets the amounts differ.
+ *
+ * The amounts are asymmetric because the white label sets the ceiling in
+ * dark mode: 40%/60% black lands within a hair of the light spec's #3a0f6e
+ * and #210340, while past about 16% white the label falls below 4.5:1.
  */
 .filled {
-  background-color: var(--color-purple-fixed);
+  background-color: var(--button-purple);
   color: var(--color-white-fixed);
 
   &:hover {
-    background-color: var(--color-dark-purple-fixed);
+    background-color: var(--button-purple-hover);
   }
 
   &:active {
-    background-color: var(--color-midnight-purple-fixed);
+    background-color: var(--button-purple-active);
   }
 }
 
 .outlined {
-  border-color: var(--color-purple-fixed);
+  border-color: var(--button-purple);
   background-color: transparent;
+  /* The label is the one part that follows the page, so it stays a
+     mode-dependent token while the purples around it do not. */
   color: var(--color-heading);
 
   &:hover {
-    border-color: var(--color-purple-fixed);
-    background-color: var(--color-purple-fixed);
+    background-color: var(--button-purple);
     color: var(--color-white-fixed);
   }
 
   &:active {
-    border-color: var(--color-midnight-purple-fixed);
-    background-color: var(--color-midnight-purple-fixed);
+    border-color: var(--button-purple-active);
+    background-color: var(--button-purple-active);
     color: var(--color-white-fixed);
   }
 }
