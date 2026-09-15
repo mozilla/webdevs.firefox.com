@@ -1,0 +1,33 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+
+import SiteLayout from '~/layouts/SiteLayout.astro';
+import { releaseNote } from './_release-note';
+
+/**
+ * One page per release note, at `/release-notes/[year]/[version]/`.
+ */
+export const getStaticPaths = (async () => {
+  const notes = await getCollection('releaseNotes');
+  return notes.map((entry) => {
+    const { year, version } = releaseNote(entry);
+    return { params: { year, version }, props: { entry } };
+  });
+}) satisfies GetStaticPaths;
+
+interface Props {
+  entry: CollectionEntry<'releaseNotes'>;
+}
+
+const { entry } = Astro.props;
+const { title } = releaseNote(entry);
+const { Content } = await render(entry);
+---
+
+<SiteLayout title={title}>
+  <article class="wrapper">
+    <h1>{title}</h1>
+    <Content />
+  </article>
+</SiteLayout>

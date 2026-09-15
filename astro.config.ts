@@ -1,7 +1,8 @@
 import { defineConfig, fontProviders } from 'astro/config';
 
-import preact from '@astrojs/preact';
+import { satteri } from '@astrojs/markdown-satteri';
 import mdx from '@astrojs/mdx';
+import preact from '@astrojs/preact';
 
 import { writeCssModuleTypes } from './lib/css-module-types.ts';
 
@@ -11,6 +12,9 @@ export default defineConfig({
   integrations: [preact(), mdx()],
   build: {
     format: 'preserve',
+  },
+  markdown: {
+    processor: satteri({ features: { definitionList: true } }),
   },
   vite: {
     resolve: {

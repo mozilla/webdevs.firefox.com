@@ -7,17 +7,19 @@
     "node": "24.19.0"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --force",
     "lint": "eslint .",
     "check": "pnpm run format:check; pnpm run build; pnpm run lint",
-    "build": "astro build && astro check",
+    "build": "astro build && astro check && tsc --noEmit",
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "import:release-notes": "node lib/release-notes/import.ts"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@astrojs/markdown-satteri": "^0.4.1",
     "@astrojs/mdx": "^8.0.1",
     "@astrojs/preact": "^6.0.5",
     "@eslint/js": "^10.0.1",

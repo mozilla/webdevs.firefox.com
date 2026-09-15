@@ -1,0 +1,22 @@
+---
+
+---
+
+<aside class="note">
+  <p class="label">TODO Note:</p>
+  <slot />
+</aside>
+
+<style>
+  .note {
+    display: grid;
+    gap: var(--space-8);
+    padding: var(--space-16);
+    border-inline-start: 0.25rem solid var(--color-purple-fixed);
+    background-color: var(--color-background-spot);
+  }
+
+  .label {
+    font-weight: 600;
+  }
+</style>
