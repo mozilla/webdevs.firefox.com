@@ -48,15 +48,16 @@
   /* Type families are wired up by the Astro Fonts API in astro.config.ts,
      which defines --font-mozilla-text and --font-mozilla-headline. */
 
-  /* Type scale: --text-* pairs with a matching --leading-*. */
+  /* Type scale: each --text-* pairs with the --leading-* of its group. Figma
+     gives every size its own leading variable, but within the body and button
+     groups they all carry the same value, so there is one token per group. */
   --text-title-sm: 2rem;
   --leading-title-sm: 1;
   --text-title-xs: 1.5rem;
   --leading-title-xs: 1.1;
   --text-body-sm: 1rem;
-  --leading-body-sm: 1.4;
   --text-body-xs: 0.875rem;
-  --leading-body-xs: 1.4;
+  --leading-body: 1.4;
   --text-button-lg: 1.5rem;
   --text-button-md: 1.25rem;
   --text-button-sm: 1.125rem;

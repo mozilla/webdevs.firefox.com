@@ -79,7 +79,7 @@ body {
   color: var(--color-text);
   font-family: var(--font-mozilla-text);
   font-size: var(--text-body-sm);
-  line-height: var(--leading-body-sm);
+  line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

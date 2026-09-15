@@ -6,47 +6,45 @@
 const linkColumns = [
   {
     heading: 'Follow Us',
-    groups: [
-      [
-        { label: 'X', href: 'https://x.com/firefoxdevtools' },
-        { label: 'BlueSky', href: 'https://bsky.app/profile/firefox.com' },
-        { label: 'Mastodon', href: 'https://mozilla.social/@firefox' },
-        { label: 'LinkedIn', href: 'https://www.linkedin.com/company/mozilla' },
-      ],
-      [
-        { label: 'YouTube', href: 'https://www.youtube.com/firefoxchannel' },
-        { label: 'TikTok', href: 'https://www.tiktok.com/@firefox' },
-        { label: 'Threads', href: 'https://www.threads.net/@firefox' },
-        { label: 'Instagram', href: 'https://www.instagram.com/firefox/' },
-      ],
+    links: [
+      {
+        label: 'BlueSky',
+        href: 'https://bsky.app/profile/webdevs.firefox.com',
+      },
+      { label: 'Mastodon', href: 'https://mastodon.social/@firefoxwebdevs' },
+      {
+        label: 'LinkedIn',
+        href: 'https://www.linkedin.com/showcase/firefox-web-developers/',
+      },
+      { label: 'X', href: 'https://x.com/FirefoxWebDevs' },
+      { label: 'YouTube', href: 'https://www.youtube.com/@FirefoxWebDevs' },
+      { label: 'TikTok', href: 'https://www.tiktok.com/@firefoxwebdevs' },
+      { label: 'Threads', href: 'https://www.threads.com/@firefoxwebdevs' },
+      {
+        label: 'Instagram',
+        href: 'https://www.instagram.com/firefoxwebdevs/reels/',
+      },
     ],
   },
   {
     heading: 'Firefox Essentials',
-    groups: [
-      [
-        { label: 'RSS', href: '/rss.xml' },
-        { label: 'MDN', href: 'https://developer.mozilla.org/' },
-        {
-          label: 'DevTools',
-          href: 'https://firefox-source-docs.mozilla.org/devtools-user/',
-        },
-        { label: 'Addons', href: 'https://addons.mozilla.org/' },
-      ],
-      [
-        {
-          label: 'WebDriver updates',
-          href: 'https://firefox-source-docs.mozilla.org/testing/geckodriver/',
-        },
-        {
-          label: 'Spidermonkey updates',
-          href: 'https://spidermonkey.dev/',
-        },
-        {
-          label: 'Security updates',
-          href: 'https://www.mozilla.org/security/advisories/',
-        },
-      ],
+    links: [
+      { label: 'RSS', href: '/rss.xml' },
+      { label: 'MDN', href: 'https://developer.mozilla.org/' },
+      {
+        label: 'DevTools',
+        href: 'https://firefox-source-docs.mozilla.org/devtools-user/',
+      },
+      { label: 'Addons', href: 'https://addons.mozilla.org/' },
+      { label: 'Spidermonkey updates', href: 'https://spidermonkey.dev/' },
+      {
+        label: 'Security blog',
+        href: 'https://blog.mozilla.org/security/',
+      },
+      {
+        label: 'Nightly blog',
+        href: 'https://blog.nightly.mozilla.org/',
+      },
     ],
   },
 ];
@@ -56,10 +54,13 @@ const legalLinks = [
     label: 'Website Privacy Notice',
     href: 'https://www.mozilla.org/privacy/websites/',
   },
-  { label: 'Terms of Use', href: 'https://www.mozilla.org/about/legal/terms/' },
+  {
+    label: 'Terms of Use',
+    href: 'https://www.mozilla.org/about/legal/terms/firefox/',
+  },
   {
     label: 'Cookie Policy',
-    href: 'https://www.mozilla.org/privacy/websites/cookies/',
+    href: 'https://www.firefox.com/privacy/websites/cookie-settings/',
   },
   {
     label: 'Community Participation Guidelines',
@@ -76,20 +77,16 @@ const legalLinks = [
   <div class="footer-inner wrapper">
     <div class="columns">
       {
-        linkColumns.map(({ heading, groups }) => (
+        linkColumns.map(({ heading, links }) => (
           <section class="column">
             <h2 class="column-heading">{heading}</h2>
-            <div class="column-groups">
-              {groups.map((group) => (
-                <ul class="link-list" role="list">
-                  {group.map(({ label, href }) => (
-                    <li>
-                      <a href={href}>{label}</a>
-                    </li>
-                  ))}
-                </ul>
+            <ul class="link-list" role="list">
+              {links.map(({ label, href }) => (
+                <li>
+                  <a href={href}>{label}</a>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
         ))
       }
@@ -118,18 +115,14 @@ const legalLinks = [
 
 <style>
   .footer {
-    /* Dark in both schemes by design, so it sets its own color-scheme and
-       then uses the mode-dependent tokens the normal way round. */
+    /* The footer uses dark mode regardless */
     color-scheme: dark;
     background-color: var(--color-background-main);
     color: var(--color-heading);
 
     & a {
       color: inherit;
-      /* Link items carry trim-both in the design; the headings below do not. */
-      text-box: trim-both cap alphabetic;
       font-size: var(--text-body-xs);
-      line-height: var(--leading-body-xs);
       text-decoration: none;
 
       &:hover {
@@ -146,18 +139,20 @@ const legalLinks = [
 
   .columns {
     display: grid;
-    grid-template-columns: auto auto auto;
-    justify-content: space-between;
+    grid-template-columns: 1fr;
+    justify-content: start;
     gap: var(--space-32);
 
-    @media (width < 64rem) {
+    /* Wide enough for two columns side by side. */
+    @media (width >= 27.1rem) {
       grid-template-columns: auto auto;
-      justify-content: start;
       column-gap: var(--space-40);
     }
 
-    @media (width < 40rem) {
-      grid-template-columns: 1fr;
+    /* Wide enough for all three. */
+    @media (width >= 64rem) {
+      grid-template-columns: auto auto 1fr;
+      column-gap: var(--space-32);
     }
   }
 
@@ -168,43 +163,47 @@ const legalLinks = [
   }
 
   .column-heading {
-    color: inherit;
-    /* The design sets these in Mozilla Text, not the headline face. */
-    font-family: var(--font-mozilla-text);
     font-size: var(--text-body-sm);
     font-weight: 700;
-    line-height: var(--leading-body-sm);
-  }
-
-  .column-groups {
-    display: grid;
-    grid-auto-flow: column;
-    gap: var(--space-16);
-
-    /* Too narrow for two link columns side by side; stack the groups. */
-    @media (width < 48rem) {
-      grid-auto-flow: row;
-      gap: var(--space-12);
-    }
   }
 
   .link-list {
+    /* Narrow: one run of links. */
     display: grid;
     align-content: start;
     gap: var(--space-12);
-    min-width: 10rem;
+
+    @media (width >= 48rem) {
+      grid-template-rows: repeat(4, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(10rem, auto);
+      column-gap: var(--space-16);
+    }
   }
 
-  .mozilla p {
-    font-size: var(--text-body-xs);
-    line-height: var(--leading-body-xs);
+  .mozilla {
+    gap: 0;
+
+    @media (width >= 64rem) {
+      justify-self: end;
+      margin-inline-end: 7rem;
+    }
+
+    & .column-heading,
+    & p {
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+
+    & a {
+      font-size: inherit;
+    }
   }
 
   .legal-list {
-    /* Flex, not grid: a variable number of legal links that need to wrap. */
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-16);
+    gap: var(--space-0) var(--space-16);
 
     & a {
       font-size: 0.625rem;
