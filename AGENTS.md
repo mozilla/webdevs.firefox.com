@@ -1,7 +1,7 @@
 # webdevs.firefox.com
 
 Astro static site for Firefox's web developer audience. Built from the
-"Firefox for Developers | Shared Design" Figma file.
+`Firefox_for_Developers` Figma file.
 
 ## Commands
 
@@ -204,7 +204,7 @@ why class names must be camelCase, and why the build has to run before
 
 ## Working with Figma
 
-The design lives in the "Firefox for Developers | Shared Design" Figma file.
+The design lives in the [`Firefox_for_Developers` Figma file][figma-file].
 Before touching it — implementing a frame, measuring spacing, checking an
 existing component against the design, or adding a colour token that needs a
 dark value — load the **`figma-shared-design`** skill
@@ -213,6 +213,8 @@ for the light and dark Home pages, and the traps in `get_design_context`,
 `get_variable_defs` and oversized MCP results that have each cost a wrong
 implementation once already. `figma-design-to-code` is still the skill to
 load before calling `get_design_context` itself.
+
+[figma-file]: https://www.figma.com/design/JFIeIEWeVOsoEZzMFKupmh/Firefox_for_Developers?node-id=42-1079
 
 Two rules are worth stating here because they bind even when you never open
 Figma: never invent a dark-mode value, and never snap a measured value to the

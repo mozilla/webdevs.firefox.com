@@ -1,16 +1,52 @@
 ---
 name: figma-shared-design
-description: Project-specific facts for reading the "Firefox for Developers | Shared Design" Figma file — the file key, Home page node IDs and the light/dark twin offset, how to get dark-mode token values, where variable bindings really come from, and the traps in get_design_context / get_variable_defs / spilled MCP output. Load this alongside figma-design-to-code whenever a task involves implementing, measuring, or checking anything against the Figma design, or adding a colour token that needs a dark value.
+description: Project-specific facts for reading the "Firefox_for_Developers" Figma file — the file key, Home page node IDs and the light/dark twin offset, how to get dark-mode token values, where variable bindings really come from, the traps in get_design_context / get_variable_defs / spilled MCP output, and what to do when the Figma server is unreachable (stop, don't guess). Load this alongside figma-design-to-code whenever a task involves implementing, measuring, or checking anything against the Figma design, or adding a colour token that needs a dark value.
 ---
 
-# Working with the Shared Design file
+# Working with the Firefox_for_Developers file
 
 Load the `figma-design-to-code` skill before calling `get_design_context`.
 This skill adds the project-specific detail that skill has no way to know.
 
-- File key: `GULnZuu07g7faYJ7wE1V4v`. The light Home page is node `42:1742`,
-  the dark equivalent `42:3623`. Node `42:1079` is the whole "Final Pages"
-  canvas and is too large to fetch in one call — target individual frames.
+## If you cannot reach Figma, stop
+
+**No Figma access means no answer. Stop and say so — do not substitute a
+guess.** The server needs OAuth and a non-interactive session cannot run
+that flow, so the failure is usually "the `figma` MCP server is not
+authorized" rather than a missing node. Report that the task is blocked,
+say it needs authorizing via `claude mcp` or `/mcp` in an interactive
+session, and end the turn there.
+
+This applies whenever the design is the source of truth for the answer:
+implementing a frame, measuring spacing, checking something against the
+design, or getting a dark-mode value. Finish any genuinely independent part
+of the request first, then stop on the part that needs Figma.
+
+What not to do instead, all of which has happened:
+
+- Don't reason from the code to a cause that sounds plausible and fix that.
+  A defect you can argue for from the CSS alone is not evidence about what
+  the design specifies, and "the columns are inconsistent with each other"
+  does not establish which one is wrong.
+- Don't ship the change with a caveat attached. A hedged guess still lands
+  in the file, still has to be reviewed, and is harder to spot than no
+  change at all. The caveat does not make it safe.
+- Don't derive the value from tokens, type metrics or a screenshot and
+  present the arithmetic as a measurement. Deriving a number is not reading
+  one.
+- Don't treat a browser screenshot as a substitute. It shows what the code
+  does, never what the design asks for, so it cannot settle a mismatch
+  between them.
+
+A wrong value that looks measured is worse than an unanswered question: it
+reads as verified to the next person, and the reasoning that produced it is
+persuasive enough to survive review. "I could not check this" is the
+correct deliverable when you could not check it.
+
+- File key: `JFIeIEWeVOsoEZzMFKupmh` — the `Firefox_for_Developers` file, at
+  `https://www.figma.com/design/JFIeIEWeVOsoEZzMFKupmh/Firefox_for_Developers`. The light Home page is node `42:1742`, the dark equivalent `42:3623`.
+  Node `42:1079` is the whole "Final Pages" canvas and is too large to fetch
+  in one call — target individual frames.
   Its light and dark twins are the same frame offset by roughly 11000 in `y`,
   so a light frame at `y=0` pairs with a dark one at `y≈10988`.
 - **When an oversized MCP result is spilled to a file, it is a JSON array of
