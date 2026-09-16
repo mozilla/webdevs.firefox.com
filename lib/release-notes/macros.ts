@@ -9,7 +9,7 @@ import type { Mdn } from './mdn.ts';
  * generating source files a human will read in a diff, so these emit the
  * markdown equivalent instead: ``[`text`](url)``, never `<a><code>`.
  *
- * Two behaviours in the originals can't be ported and are replaced rather
+ * Two behaviors in the originals can't be ported and are replaced rather
  * than dropped:
  *
  * - `web.smartLink()` resolves a link against the whole content repo and
@@ -146,7 +146,7 @@ const MACROS: Record<string, MacroFunction> = {
 
     // `Array.prototype.at()` lives under `Global_Objects/`, while
     // `Statements/try...catch` sits at the reference root. Fall back to the
-    // direct path when neither exists, matching the original's behaviour.
+    // direct path when neither exists, matching the original's behavior.
     const globalObjects = `${base}Global_Objects/${slug}`;
     let url = base + slug;
     if (!mdn.pageExists(url) && mdn.pageExists(globalObjects)) {

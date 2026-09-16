@@ -81,7 +81,7 @@ transformer, or a post-highlight hast pass — are both more fragile.)
 `printWidth: 24` and `printWidth: 80` — it breaks one-attribute-per-line and
 stops there. HTML examples will therefore almost always dedupe to a single
 variant. Not a bug for us (it costs nothing and degrades to today's
-behaviour), but don't promise responsive HTML samples.
+behavior), but don't promise responsive HTML samples.
 
 **Below ~40ch, Prettier output becomes unreadable.** At `printWidth: 24` the
 sample degraded to one identifier per line:
@@ -157,7 +157,7 @@ export async function formatVariants(
 ): Promise<Variant[] | null>; // null = leave the author's code alone
 ```
 
-Behaviour:
+Behavior:
 
 - **Language gate.** Map only languages with a dependable Prettier parser:
   `js`/`jsx`/`mjs` → `babel`, `ts`/`tsx` → `typescript`, `css`/`scss`/`less`,
@@ -260,7 +260,7 @@ Notes:
   line layout is the point of the example.
 - Prettier's own `// prettier-ignore` works inside a block for free.
 
-Strip recognised directives from `meta` before passing it on, so Shiki
+Strip recognized directives from `meta` before passing it on, so Shiki
 transformers don't see them.
 
 ### Phase 3 — The CSS
@@ -350,7 +350,7 @@ generator.
 A webfont would mean the container query evaluates against fallback metrics
 until the font loads and then re-evaluates, visibly swapping variants mid-load.
 A system stack is also zero bytes. `ch` differing per platform is correct
-behaviour here, not a problem — it measures the font the reader actually sees.
+behavior here, not a problem — it measures the font the reader actually sees.
 
 Per the project's CSS conventions: no pixel values, `ch` and `rem` only, and
 the container query threshold in `ch` is deliberate rather than a length.
@@ -364,7 +364,7 @@ the accessibility tree and out of tab order already; no `aria-hidden` needed.
 
 ### Phase 5 — Verification
 
-1. **Unit tests** for `formatVariants`: dedupe behaviour, the widest-first
+1. **Unit tests** for `formatVariants`: dedupe behavior, the widest-first
    short-circuit, the language gate, and the `null` return on a syntax error.
 2. **A fixture page** (`src/pages/_dev/code-widths.astro`, excluded from the
    build) rendering a matrix of languages × snippet lengths inside a

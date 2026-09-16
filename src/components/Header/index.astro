@@ -19,10 +19,28 @@ const externalLinks = [
   { label: 'Addons', href: 'https://addons.mozilla.org/' },
 ];
 
+interface Props {
+  /**
+   * Which color scheme the header resolves its own colors against.
+   *
+   * `auto` follows the page. `dark` or `light` pins it, for a header sitting
+   * over artwork that looks the same in both themes — the purple hero
+   * gradient wants `dark`, where the nav is white whatever the page does.
+   * Every color in the header moves together, so one pinned `color-scheme`
+   * states that once instead of duplicating each value.
+   *
+   * A pinned header also drops its background, letting what it sits over
+   * show through.
+   */
+  theme?: 'auto' | 'dark' | 'light' | undefined;
+}
+
+const { theme = 'auto' } = Astro.props;
+
 const currentPath = Astro.url.pathname;
 ---
 
-<header class="header">
+<header class:list={['header', theme !== 'auto' && `theme-${theme}`]}>
   <div class="header-inner wrapper">
     <a class="brand" href="/">
       <img
@@ -49,26 +67,22 @@ const currentPath = Astro.url.pathname;
 
     <nav class="nav" aria-label="Main">
       <ul class="nav-list" role="list">
-        {
-          primaryLinks.map(({ label, href }) => (
-            <li>
-              <a
-                href={href}
-                aria-current={currentPath.startsWith(href) ? 'page' : undefined}
-              >
-                {label}
-              </a>
-            </li>
-          ))
-        }
+        {primaryLinks.map(({ label, href }) => (
+          <li>
+            <a
+              href={href}
+              aria-current={currentPath.startsWith(href) ? 'page' : undefined}
+            >
+              {label}
+            </a>
+          </li>
+        ))}
         <li role="separator" class="nav-divider"></li>
-        {
-          externalLinks.map(({ label, href }) => (
-            <li>
-              <a href={href}>{label}</a>
-            </li>
-          ))
-        }
+        {externalLinks.map(({ label, href }) => (
+          <li>
+            <a href={href}>{label}</a>
+          </li>
+        ))}
       </ul>
     </nav>
 
@@ -81,6 +95,23 @@ const currentPath = Astro.url.pathname;
 <style>
   .header {
     background-color: var(--color-background-main);
+  }
+
+  /* A pinned scheme resolves --color-heading and --color-border to that
+     scheme's values, so the nav and divider need no second set of colors.
+     The background goes transparent so whatever the header sits over — the
+     hero gradient — shows through instead of a fill of its own. */
+  .theme-dark,
+  .theme-light {
+    background-color: transparent;
+  }
+
+  .theme-dark {
+    color-scheme: dark;
+  }
+
+  .theme-light {
+    color-scheme: light;
   }
 
   .header-inner {

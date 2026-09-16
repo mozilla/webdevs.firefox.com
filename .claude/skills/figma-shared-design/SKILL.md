@@ -1,6 +1,6 @@
 ---
 name: figma-shared-design
-description: Project-specific facts for reading the "Firefox_for_Developers" Figma file — the file key, Home page node IDs and the light/dark twin offset, how to get dark-mode token values, where variable bindings really come from, the traps in get_design_context / get_variable_defs / spilled MCP output, and what to do when the Figma server is unreachable (stop, don't guess). Load this alongside figma-design-to-code whenever a task involves implementing, measuring, or checking anything against the Figma design, or adding a colour token that needs a dark value.
+description: Project-specific facts for reading the "Firefox_for_Developers" Figma file — the file key, Home page node IDs and the light/dark twin offset, how to get dark-mode token values, where variable bindings really come from, the traps in get_design_context / get_variable_defs / spilled MCP output, and what to do when the Figma server is unreachable (stop, don't guess). Load this alongside figma-design-to-code whenever a task involves implementing, measuring, or checking anything against the Figma design, or adding a color token that needs a dark value.
 ---
 
 # Working with the Firefox_for_Developers file
@@ -87,9 +87,9 @@ correct deliverable when you could not check it.
 - **A component's variable bindings come from its component set, not from a
   page that happens to use it.** The Buttons set (`43:6818`) binds the
   mode-dependent Purple / Dark Purple / Midnight Purple, so button fills
-  shift with the colour scheme; the dark Home frame separately binds
+  shift with the color scheme; the dark Home frame separately binds
   `Purple Fixed` for unrelated artwork, and reading that as the button's
-  colour is how the styles ended up wrongly pinned to one palette.
+  color is how the styles ended up wrongly pinned to one palette.
 - `get_variable_defs` resolves variables in **one** mode — whichever the
   queried node sits in — and the output gives no hint which. Light and dark
   values therefore look indistinguishable in isolation: call it on both twins
@@ -97,12 +97,12 @@ correct deliverable when you could not check it.
 - Download image and SVG assets into `src/assets/` and commit them. Figma's
   asset URLs expire after about 7 days.
 - Icons and logos exported from Figma may have hardcoded fills. Swap them for
-  `currentColor` so they follow the colour scheme — the Firefox wordmark
-  shipped with the light-mode heading colour baked in.
+  `currentColor` so they follow the color scheme — the Firefox wordmark
+  shipped with the light-mode heading color baked in.
 
-## Colour tokens
+## Color tokens
 
 Get dark values from the dark Home panel (node `42:3623`) via
 `get_variable_defs`. Never invent them. See "Design tokens" in `AGENTS.md`
-for how those values are then written — every colour token uses
-`light-dark()`, and there is no parallel palette of fixed colours.
+for how those values are then written — every color token uses
+`light-dark()`, and there is no parallel palette of fixed colors.

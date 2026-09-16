@@ -20,6 +20,24 @@ pnpm is the package manager and the Node version is pinned in
 `package.json`/`.npmrc` — use `corepack enable` rather than a global pnpm.
 CI runs `pnpm run lint` and `pnpm run build` on every PR.
 
+## Writing
+
+**Use US spelling everywhere** — comments, doc comments, commit messages,
+plans, markdown, identifiers and any text the site renders. So `color`,
+`behavior`, `center`, `gray`, `optimize`, `defense`, not the `-our-`/`-re`/
+`-ise` forms.
+
+This is not a style preference so much as a consistency one: CSS and the DOM
+are US-spelled (`color-scheme`, `background-color`, `currentColor`), and the
+token names built from them are too, so a comment describing
+`--color-border` in the `-our-` spelling makes the prose and the code it
+documents disagree on the same page. Keeping one spelling means a search for
+`color` finds the discussion as well as the declaration.
+
+MDN release notes imported into `src/content/release-notes/` are excluded:
+they are copied verbatim and the importer is re-runnable, so edits there
+would be overwritten.
+
 ## CSS
 
 ### Prefer grid over flexbox
@@ -62,20 +80,31 @@ stay unitless numbers. Control the rendered size in CSS.
 
 ### Design tokens
 
-All colour, spacing and type values live in `src/styles/tokens.css` as custom
+All color, spacing and type values live in `src/styles/tokens.css` as custom
 properties. Token names mirror the Figma variable names exactly so the two
 stay reconcilable — don't rename them, and don't hardcode a value that has a
 token. The numbers in the spacing and type token names are Figma's pixel
 values, while the values themselves are rem.
 
-Mode-dependent colours use `light-dark()`, with `color-scheme: light dark`
+`--space-30` is the one spacing token with no Figma variable behind it, and
+it is deliberate rather than a slip — don't inline it back into literals. It
+earned a name because the editorial designs use 30 in about a dozen places
+(between list items, inside the Note panel, around a blockquote, under the
+hero headline), and a dozen copies of `1.875rem` each carrying a copy of the
+same "not on the scale" comment is worse than one named value. That is the
+bar for the next one too: a value gets a token when it recurs across
+components, not merely because it is off-scale. A one-off still gets a
+literal and a comment — the 50 of clear space above a prose section heading,
+the 38 the blockquote's quote mark hangs by.
+
+Mode-dependent colors use `light-dark()`, with `color-scheme: light dark`
 set on `:root`. Where a **whole subtree** should look the same in both
 schemes, prefer pinning its `color-scheme` over a second set of values: the
 footer is `color-scheme: dark` plus `--color-background-main` and
 `--color-heading`, read the normal way round, so the scheme is stated once
-instead of being encoded into every colour.
+instead of being encoded into every color.
 
-That only works when every colour on the element moves together, which is why
+That only works when every color on the element moves together, which is why
 `--color-purple-fixed` and `--color-white-fixed` remain plain values. A button
 pairs a fixed purple fill with a mode-dependent label (`--color-heading` on
 the outlined style) and a mode-dependent disabled state on the same element —
@@ -111,7 +140,7 @@ next to the thing it modifies:
   `&[aria-current='page']` go inside the base rule. They are never read
   independently of it.
 - **Media query overrides** — put the `@media` block inside the rule it
-  overrides, so a component's responsive behaviour reads top to bottom in
+  overrides, so a component's responsive behavior reads top to bottom in
   one place instead of being scattered across breakpoint blocks at the
   bottom of the file. Keep the breakpoint comment with the block.
 - **Descendants tied to one parent** — `.footer { & a { … } }` where the
@@ -206,7 +235,7 @@ why class names must be camelCase, and why the build has to run before
 
 The design lives in the [`Firefox_for_Developers` Figma file][figma-file].
 Before touching it — implementing a frame, measuring spacing, checking an
-existing component against the design, or adding a colour token that needs a
+existing component against the design, or adding a color token that needs a
 dark value — load the **`figma-shared-design`** skill
 (`.claude/skills/figma-shared-design/`). It holds the file key, the node IDs
 for the light and dark Home pages, and the traps in `get_design_context`,
@@ -218,9 +247,11 @@ load before calling `get_design_context` itself.
 
 Two rules are worth stating here because they bind even when you never open
 Figma: never invent a dark-mode value, and never snap a measured value to the
-nearest token to make it look tokenised — the spacing scale is
-0/8/12/16/24/32/40/80, so a 20 is positional and gets a literal `1.25rem`
-with a comment.
+nearest token to make it look tokenised — Figma's spacing scale is
+0/8/12/16/20/24/32/40/80, so the 50 above a prose section heading is
+positional and gets a literal `3.125rem` with a comment. The one value named
+without a Figma variable behind it is `--space-30`; see "Design tokens" above
+for what it took to earn that.
 
 ## Not yet built
 
@@ -228,5 +259,5 @@ Link destinations in the header and footer are inferred from labels, since
 the design only specifies text. They need checking against what the team
 actually intends.
 
-Only desktop frames (1440px) exist in Figma, so responsive behaviour below
+Only desktop frames (1440px) exist in Figma, so responsive behavior below
 that is an interpretation rather than a spec.

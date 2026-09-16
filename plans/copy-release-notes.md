@@ -11,7 +11,7 @@ Source: `files/en-us/mozilla/firefox/releases` in [mdn/content][content].
 A Node script, callable from `pnpm run`, does a shallow checkout of those
 files and converts them. It is re-runnable and overwrites its previous output
 — the human check is the git diff. It errors on any syntax it does not
-recognise, rather than passing it through or guessing.
+recognize, rather than passing it through or guessing.
 
 Page design is out of scope, with one exception: this plan builds a `Note`
 component, because the source needs one and the converter has to know what to
@@ -233,7 +233,7 @@ The 404 itself is whatever the host serves until there's a
 
 13 distinct macros in scope, and nothing else — a closed list, which is what
 makes the plan's error-on-unknown rule enforceable. Counts are
-case-normalised, because KumaScript matches names case-insensitively and the
+case-normalized, because KumaScript matches names case-insensitively and the
 source is inconsistent (`domxref`, `DOMxRef`, `Domxref`, `DOMxref` all appear):
 
 ```text
@@ -341,7 +341,7 @@ plain blockquote containing the literal text `[!NOTE]`. Verified, including
 against the plausible-sounding `alerts`, `callouts` and `admonitions` feature
 names, none of which exist.
 
-15 alerts at 60+, one per file, all `[!NOTE]`, in two flavours:
+15 alerts at 60+, one per file, all `[!NOTE]`, in two flavors:
 
 - **An aside** (75, 82–93) — _"See also [Lots to see in Firefox 93](…) on
   Mozilla Hacks."_

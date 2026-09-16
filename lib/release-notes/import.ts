@@ -23,7 +23,7 @@ import { releasesFrom } from './release-dates.ts';
  * and the human check is the git diff. Pass `--fresh` to re-fetch the content
  * checkout rather than reuse the cached one.
  *
- * Deliberately noisy on anything it doesn't recognise. An unknown macro or
+ * Deliberately noisy on anything it doesn't recognize. An unknown macro or
  * alert type aborts the run naming the file and line, rather than passing the
  * syntax through to produce a page that renders `{{SomeMacro}}` as text.
  */

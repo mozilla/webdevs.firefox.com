@@ -29,7 +29,7 @@ These are called out inline too, but collected here:
 1. **Object store provider** — blocks the storage layer. See
    [Storage](#storage).
 2. **Widths** — see [Widths](#widths) for a proposed starting set.
-3. **Colour schemes** — the site is built on `light-dark()`, so dark mode is
+3. **Color schemes** — the site is built on `light-dark()`, so dark mode is
    an entirely untested surface. Proposal: schemes are declared per fixture
    rather than multiplied across the whole matrix.
 4. **Do pre-release browsers block a PR?** Proposal: no. See
@@ -154,14 +154,14 @@ export interface Fixture {
   page: string;
   /** Widths in px. Defaults to the standard set. */
   widths?: number[] | undefined;
-  /** Colour schemes. Defaults to ['light']. */
+  /** Color schemes. Defaults to ['light']. */
   schemes?: ('light' | 'dark')[] | undefined;
 }
 ```
 
 Declaring widths and schemes per fixture, instead of cross-multiplying
 everything, keeps the shot count honest. A footer that has real dark-mode
-behaviour asks for both schemes; a fixture that is scheme-agnostic does not
+behavior asks for both schemes; a fixture that is scheme-agnostic does not
 pay for a second screenshot. An explicit list is also greppable and diffable,
 which a glob is not.
 
@@ -326,7 +326,7 @@ pnpm vrt:gc --prune --json     machine-readable, for CI summaries
 ```
 
 **Dry run is the default.** Deleting from a shared bucket is not reversible
-and not something to do by accident, so the destructive behaviour is opt-in.
+and not something to do by accident, so the destructive behavior is opt-in.
 
 ### What counts as a root
 
@@ -556,7 +556,7 @@ Each phase is independently useful and independently reviewable.
   reports changes nobody reads. Mitigated by keeping the blocking matrix
   pinned and strict, and pushing churn-prone browsers into the advisory job.
 - **Matrix growth.** 5 browsers × 4 widths × schemes × fixtures compounds
-  quickly. Per-fixture width and scheme declarations are the main defence;
+  quickly. Per-fixture width and scheme declarations are the main defense;
   revisit if a run exceeds a few minutes.
 - **WebKit's Linux rendering** will produce diffs that are engine-real but
   Safari-irrelevant. If that proves noisy, dropping WebKit to advisory is the

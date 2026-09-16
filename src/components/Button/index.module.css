@@ -84,7 +84,7 @@
 /*
  * Every button instance on the Home and article frames binds Purple Fixed
  * and White Fixed in both Figma modes, so the resting fill does not shift
- * with the colour scheme. (The Buttons component set binds the mode-dependent
+ * with the color scheme. (The Buttons component set binds the mode-dependent
  * Purple instead, but the pages are what we are building.)
  *
  * The pages only ever show the resting state, so hover and pressed are

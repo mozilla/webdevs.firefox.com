@@ -76,20 +76,18 @@ const legalLinks = [
 <footer class="footer">
   <div class="footer-inner wrapper">
     <div class="columns">
-      {
-        linkColumns.map(({ heading, links }) => (
-          <section class="column">
-            <h2 class="column-heading">{heading}</h2>
-            <ul class="link-list" role="list">
-              {links.map(({ label, href }) => (
-                <li>
-                  <a href={href}>{label}</a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))
-      }
+      {linkColumns.map(({ heading, links }) => (
+        <section class="column">
+          <h2 class="column-heading">{heading}</h2>
+          <ul class="link-list" role="list">
+            {links.map(({ label, href }) => (
+              <li>
+                <a href={href}>{label}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
 
       <section class="column mozilla">
         <h2 class="column-heading">Powered by Mozilla</h2>
@@ -101,13 +99,11 @@ const legalLinks = [
 
     <nav class="legal" aria-label="Legal">
       <ul class="legal-list" role="list">
-        {
-          legalLinks.map(({ label, href }) => (
-            <li>
-              <a href={href}>{label}</a>
-            </li>
-          ))
-        }
+        {legalLinks.map(({ label, href }) => (
+          <li>
+            <a href={href}>{label}</a>
+          </li>
+        ))}
       </ul>
     </nav>
   </div>
