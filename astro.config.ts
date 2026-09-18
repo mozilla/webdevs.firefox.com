@@ -9,6 +9,7 @@ import { codeWidths } from './lib/markdown/code-widths/plugin.ts';
 import { transformerIndentWrap } from './lib/markdown/code-widths/indent-wrap.ts';
 import { definitionGroups } from './lib/markdown/definition-groups.ts';
 import { looseBlocks } from './lib/markdown/loose-blocks.ts';
+import { proseComponents } from './lib/markdown/prose-components.ts';
 import { tableScroll } from './lib/markdown/table-scroll.ts';
 
 // https://astro.build/config
@@ -30,6 +31,7 @@ export default defineConfig({
     }),
   },
   vite: {
+    plugins: [proseComponents()],
     resolve: {
       extensions: [
         '.astro',

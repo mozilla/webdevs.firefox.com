@@ -2,7 +2,6 @@
 import ArticleLayout from '~/layouts/ArticleLayout.astro';
 import ArticleHero from '~/components/ArticleHero';
 import { testPagePaths } from '~/pages/_test/_test-pages';
-import Prose from '~/components/Prose';
 import { Content, getHeadings, frontmatter } from '~/pages/_test/prose.mdx';
 
 /**
@@ -32,5 +31,5 @@ const sections = getHeadings().filter(({ depth }) => depth === 2);
     <Fragment slot="byline">Specimen page</Fragment>
   </ArticleHero>
 
-  <Prose {Content} />
+  <Content />
 </ArticleLayout>

@@ -259,13 +259,42 @@ siblings belongs to the stylesheet that can see both.
 
 **A construct with a component behind it keeps its styles in that component,
 not in `prose.css`.** Markdown syntax is mapped onto the component in
-`src/components/Prose/index.astro`, so the component is not an alternative to
+`lib/markdown/prose-components.ts`, so the component is not an alternative to
 authored markup — it _is_ what authored markup renders as. `Blockquote` works
 this way: an author writes `>` and gets it.
 
-A page renders MDX through `<Prose {Content} />` rather than `<Content />`,
-because the `components` mapping has to be passed at every call site and Astro
-has no global equivalent. Routing it through one component means one copy.
+That mapping is a Vite plugin, which appends a `components` export to every
+MDX file — `@astrojs/mdx` merges one from the module itself. **So a page
+renders a bare `<Content />`**, and adding a mapping is one line in
+`MAPPED_COMPONENTS`, for an `.astro` component as readily as a `.tsx` one.
+Read that file's doc comment before changing it.
+
+The reason it is not the obvious `<Content components={…} />` at each call
+site, or a wrapper component sharing one copy of the mapping, is that the
+wrapper breaks every component an MDX file imports. Before a page streams,
+Astro collects the components that contribute to `<head>`, which is how an
+entry's imported components get their styles onto the page. It finds them by
+construction — instantiating a component calls its slot functions
+immediately, so a `<Content />` nested in layouts is reached — but a
+component passed as a _prop_ is an inert value until something renders it,
+and a wrapper renders it from inside its own body, after the head is out. So
+`<Wrapper><Content /></Wrapper>` is fine and `<Wrapper {Content} />` is not,
+and a wrapper whose whole job is to supply `components` can only be the
+latter. Leaving nothing to pass is what makes the mistake unavailable.
+
+That failure is silent and leaves the markup with none of its rules, in
+`pnpm dev` as much as in a built page. What makes it easy to misread is that
+a page importing the same MDX as a plain module, as `/test/prose/` does, is
+styled correctly either way — there the component is in the page's own module
+graph and no propagation is involved — so checking the specimen proves
+nothing about a release note.
+
+**A component an author calls by name is imported by the MDX file that uses
+it**, the ordinary way, and `Note` works this way. Only markdown syntax's own
+components go in `MAPPED_COMPONENTS`: what is listed there is appended to
+every MDX file, so its CSS reaches every page that renders prose whether or
+not the page uses it. A blockquote earns that because any prose page can
+produce one; a `<Note>` does not.
 
 Two satteri plugins normalize the markup `prose.css` styles. Each carries its
 full rationale in its own doc comment — read the file before changing it:

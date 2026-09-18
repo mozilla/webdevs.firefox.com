@@ -1,6 +1,5 @@
 ---
 import SiteLayout from '~/layouts/SiteLayout.astro';
-import Prose from '~/components/Prose';
 import { testPagePaths } from '~/pages/_test/_test-pages';
 import { Content, frontmatter } from '~/pages/_test/code.mdx';
 import '~/styles/prose.css';
@@ -28,7 +27,7 @@ const { title } = frontmatter as { title: string };
     <h1>{title}</h1>
 
     <div class="prose">
-      <Prose {Content} />
+      <Content />
     </div>
   </div>
 </SiteLayout>

@@ -5,11 +5,15 @@
  * and an optional attribution beneath, the name in semibold over the role.
  *
  * Mapped onto markdown's `>` syntax, so an author writes a plain blockquote
- * and gets this. Every page that renders MDX passes it through the `components`
- * prop — see `prose-components.ts`, which is the one place that mapping is
- * written. That is what lets the styles live here rather than in `prose.css`:
- * the component is not an alternative to authored markup, it *is* what
- * authored markup renders as, so there is no second code path to keep in step.
+ * and gets this. The mapping is `lib/markdown/prose-components.ts`, which
+ * appends it to every MDX file, so a page renders a bare `<Content />` and an
+ * MDX file needs no import to get the `>` form. That is what lets the styles
+ * live here rather than in `prose.css`: the component is not an alternative
+ * to authored markup, it *is* what authored markup renders as, so there is no
+ * second code path to keep in step.
+ *
+ * An MDX file does import it for the explicit form below, as `_test/prose.mdx`
+ * does — a second import of the same module, which costs nothing.
  *
  * The quote is the default slot. An attribution is added with the `name` and
  * `role` slots, which markdown cannot express and so are only reachable from

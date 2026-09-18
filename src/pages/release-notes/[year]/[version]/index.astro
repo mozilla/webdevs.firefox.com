@@ -5,7 +5,6 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import ArticleLayout from '~/layouts/ArticleLayout.astro';
 import ArticleHero from '~/components/ArticleHero';
 import { releaseNote } from './_release-note';
-import Prose from '~/components/Prose';
 
 /**
  * One page per release note, at `/release-notes/[year]/[version]/`.
@@ -48,5 +47,5 @@ const formattedDate = releaseDate.toLocaleDateString('en-US', {
     </time>
   </ArticleHero>
 
-  <Prose {Content} />
+  <Content />
 </ArticleLayout>
