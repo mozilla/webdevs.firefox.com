@@ -7,15 +7,39 @@ interface Props {
   title: string;
   description?: string | undefined;
   image?: string | undefined;
+  /**
+   * Overlays the header on the page's first element, so a full-bleed hero
+   * paints its gradient up behind it. The header pins itself to the dark
+   * scheme to stay legible over that gradient, so the overlap and the
+   * scheme are the same decision and travel together as one flag.
+   */
+  headerOverlay?: boolean | undefined;
+  /** Passed through to `MainLayout`, which documents it. */
+  preloadCodeFont?: boolean | undefined;
 }
 
-const { title, description, image } = Astro.props;
+const {
+  title,
+  description,
+  image,
+  headerOverlay = false,
+  preloadCodeFont,
+} = Astro.props;
 ---
 
-<MainLayout title={title} description={description} image={image}>
-  <a class="skip-link" href="#main">Skip to content</a>
-  <div class="shell">
-    <Header />
+<MainLayout
+  title={title}
+  description={description}
+  image={image}
+  {preloadCodeFont}
+>
+  <a class="skip-link" href="#main">
+    Skip to content
+  </a>
+  <div class:list={['shell', { 'header-over-hero': headerOverlay }]}>
+    <div class="header-slot">
+      <Header overlay={headerOverlay} />
+    </div>
     <main id="main">
       <slot />
     </main>
@@ -31,11 +55,34 @@ const { title, description, image } = Astro.props;
     min-height: 100dvh;
   }
 
+  /* `headerOverlay` marks a page that draws a full-bleed hero, which
+     has to start at the very top, behind the transparent header. Putting the
+     header and main in the same grid row is what gets the hero's background
+     under it — the hero then pads its own content clear of the nav. */
+  .shell.header-over-hero {
+    grid-template-rows: 1fr auto;
+
+    & .header-slot {
+      grid-row: 1;
+      grid-column: 1;
+      /* Above the hero background, and short enough not to intercept
+         clicks on the hero below it. */
+      z-index: 1;
+      align-self: start;
+    }
+
+    & main {
+      grid-row: 1;
+      grid-column: 1;
+    }
+  }
+
   .skip-link {
     position: absolute;
     top: var(--space-8);
     left: var(--space-8);
-    z-index: 1;
+    /* Above the header */
+    z-index: 100;
     padding: var(--space-8) var(--space-16);
     border-radius: var(--radius-pill);
     /* Matches a filled button: purple fill, white label in both schemes. */

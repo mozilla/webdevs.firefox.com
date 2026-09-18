@@ -1,0 +1,151 @@
+---
+title: 'Code blocks'
+---
+
+Every block below goes through `codeWidths`, which formats it with Prettier at
+each width in `TIERS` and emits one variant per distinct result. Drag the
+handle at the bottom right of the column to change the measure and watch the
+variants swap.
+
+The code fences in this file are exempt from Prettier in `.prettierrc`: the
+input formatting is the thing under test here, so it cannot also be Prettier's
+own output.
+
+## Reflows at every tier
+
+A call chain with enough arguments to break differently at each width, which
+is the case the whole feature exists for.
+
+```js
+const observer = new IntersectionObserver((entries, observer) => entries.forEach((entry) => entry.target.classList.toggle('visible', entry.isIntersecting)), { rootMargin: '0px 0px -25% 0px', threshold: [0, 0.5, 1] });
+```
+
+## Reflows once
+
+CSS breaks in fewer places than JavaScript, so it usually collapses to two or
+three variants.
+
+```css
+::picker(select) { margin: 0; inset: auto; min-inline-size: anchor-size(self-inline); max-block-size: stretch; position-area: self-block-end span-self-inline-end; position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline; }
+```
+
+## Does not reflow
+
+Nothing here is longer than the narrowest tier, so the widest-first
+short-circuit returns after one Prettier call and the block emits a single
+`pre` — exactly what it would have emitted without this feature.
+
+```js
+const el = document.querySelector('#app');
+el.textContent = 'Hello';
+```
+
+## Lines Prettier cannot break
+
+Prettier never breaks inside a comment and cannot break a long identifier or
+URL, so these outrun whichever tier they were formatted for. They wrap, with
+the continuation aligned under the start of the line's content rather than
+back at the gutter.
+
+```js
+function load() {
+  // See https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver for the full set of options.
+  const configurationForTheObserverThatWatchesTheSidebar = { rootMargin: '0px' };
+  return configurationForTheObserverThatWatchesTheSidebar;
+}
+```
+
+## Deep indentation
+
+The indent is its own grid column, so a wrapped line at this depth still lines
+up under itself.
+
+```js
+export function walk(node) {
+  if (node.children) {
+    for (const child of node.children) {
+      if (child.type === 'element') {
+        child.properties.dataSeenByTheWalkerWhileDescending = 'yes, this is a deliberately long value';
+      }
+    }
+  }
+}
+```
+
+## Blank lines
+
+A blank line has no content to give it height, so the grid gives it one.
+
+```js
+const a = 1;
+
+const b = 2;
+
+
+const c = 3;
+```
+
+## A fragment Prettier cannot parse
+
+Illustrative code that isn't a complete program. Prettier throws, the block
+ships as authored, and the build log gets a warning naming the file.
+
+```js
+if (entry.isIntersecting) {
+  // …
+```
+
+## An unmapped language
+
+`bash` has no entry in the parser map, so it is left alone with nothing said
+about it — the same as any prose-only fence.
+
+```bash
+pnpm dev --host
+```
+
+## No language at all
+
+```
+$ pnpm dev
+  ready in 214ms
+```
+
+## `no-format`
+
+Ships exactly what the author wrote. Use it when the layout is the point.
+
+```js no-format
+const matrix = [
+  1, 0, 0,
+  0, 1, 0,
+  0, 0, 1,
+];
+```
+
+## `width=80`
+
+One variant at a fixed width, for a sample that has to demonstrate a specific
+line layout. It stays at 80 characters however narrow the column gets.
+
+```js width=80
+const options = { rootMargin: '0px 0px -25% 0px', threshold: [0, 0.5, 1] };
+```
+
+## `prettier-ignore`
+
+Prettier honors the directive, and the directive itself is stripped before the
+block reaches the reader.
+
+```js
+// prettier-ignore
+const matrix = [1, 0, 0,
+                0, 1, 0,
+                0, 0, 1];
+const after = { formattedNormally: true, andBrokenAcrossLinesWhenNarrow: true };
+```
+
+## Inline code
+
+An inline `code` span is untouched by any of this — it has no fence, no meta
+string and no width to pick.

@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "astro dev --force",
     "lint": "eslint .",
-    "check": "pnpm run format:check; pnpm run build; pnpm run lint",
+    "test": "node --test \"lib/**/*.test.ts\"",
+    "check": "pnpm run format:check; INCLUDE_TEST_PAGES=1 pnpm run build; pnpm run lint; pnpm run test",
     "build": "astro build && astro check && tsc --noEmit",
     "preview": "astro preview",
     "astro": "astro",
@@ -33,7 +34,9 @@
     "preact": "^10.29.8",
     "prettier": "3.9.6",
     "prettier-plugin-astro": "1.0.0",
+    "satteri": "0.10.5",
     "sharp": "^0.35.4",
+    "shiki": "^4.4.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0"
   }

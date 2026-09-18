@@ -5,12 +5,13 @@ Astro static site for Firefox's web developer audience. Built from the
 
 ## Commands
 
-| Command       | Purpose                                               |
-| ------------- | ----------------------------------------------------- |
-| `pnpm dev`    | Dev server                                            |
-| `pnpm check`  | Prettier + `pnpm build` + ESLint (run before commits) |
-| `pnpm build`  | Production build, then `astro check`                  |
-| `pnpm format` | Write Prettier formatting                             |
+| Command       | Purpose                                                |
+| ------------- | ------------------------------------------------------ |
+| `pnpm dev`    | Dev server                                             |
+| `pnpm check`  | Prettier + build + ESLint + tests (run before commits) |
+| `pnpm build`  | Production build, then `astro check` and `tsc`         |
+| `pnpm format` | Write Prettier formatting                              |
+| `pnpm test`   | Unit tests for `lib/`, on Node's own runner            |
 
 The build runs before both `astro check` and ESLint, because it generates the
 CSS Module declarations that their type-aware rules read — see
@@ -18,7 +19,10 @@ CSS Module declarations that their type-aware rules read — see
 
 pnpm is the package manager and the Node version is pinned in
 `package.json`/`.npmrc` — use `corepack enable` rather than a global pnpm.
-CI runs `pnpm run lint` and `pnpm run build` on every PR.
+CI runs `pnpm run format:check`, `pnpm run build`, `pnpm run lint` and
+`pnpm run test` on every PR, in that order. It runs them as separate steps
+rather than calling `pnpm check`, because that script is `;`-separated and so
+exits with only `test`'s status — a broken build would leave CI green.
 
 ## Writing
 
@@ -27,12 +31,10 @@ plans, markdown, identifiers and any text the site renders. So `color`,
 `behavior`, `center`, `gray`, `optimize`, `defense`, not the `-our-`/`-re`/
 `-ise` forms.
 
-This is not a style preference so much as a consistency one: CSS and the DOM
-are US-spelled (`color-scheme`, `background-color`, `currentColor`), and the
-token names built from them are too, so a comment describing
-`--color-border` in the `-our-` spelling makes the prose and the code it
-documents disagree on the same page. Keeping one spelling means a search for
-`color` finds the discussion as well as the declaration.
+It is a consistency rule rather than a style one: CSS and the DOM are
+US-spelled (`color-scheme`, `currentColor`) and the token names built from
+them are too, so one spelling means a search for `color` finds the discussion
+as well as the declaration.
 
 MDN release notes imported into `src/content/release-notes/` are excluded:
 they are copied verbatim and the importer is re-runnable, so edits there
@@ -71,12 +73,31 @@ user's font-size preference instead of ignoring it.
 Use `em` where the value should track its own element's font size — chiefly
 `letter-spacing`, so tracking stays proportional as type sizes change.
 
-Media queries use `rem` too (`@media (width < 60rem)`), which makes
+Media queries use `rem` too (`@media (width >= 60rem)`), which makes
 breakpoints respond to root font size.
 
 The exception is the `width`/`height` attributes on Astro's `<Image>` and
 imported SVG components: those are intrinsic asset dimensions, not CSS, and
 stay unitless numbers. Control the rendered size in CSS.
+
+### Media queries are mobile first
+
+Unconditional rules describe the narrowest layout, and every media query is
+a min-width one (`width >= 48rem`) adding to it as room appears. Don't write
+a `width <` query.
+
+The narrow layout is usually the simpler of the two — one column, no sticky
+positioning, full-bleed — so making it the base means the exceptional case
+is the one behind a query, and a property whose value is the same at every
+width is written once. It also keeps the fallback honest: anything that
+can't evaluate the query, printing included, gets the layout that survives
+the least space.
+
+A consequence worth expecting: a default that is also the CSS initial value
+disappears rather than being restated.
+
+Breakpoints are chosen per component, at the width where that component's own
+layout stops working, rather than from a shared set of device sizes.
 
 ### Design tokens
 
@@ -86,16 +107,12 @@ stay reconcilable — don't rename them, and don't hardcode a value that has a
 token. The numbers in the spacing and type token names are Figma's pixel
 values, while the values themselves are rem.
 
-`--space-30` is the one spacing token with no Figma variable behind it, and
-it is deliberate rather than a slip — don't inline it back into literals. It
-earned a name because the editorial designs use 30 in about a dozen places
-(between list items, inside the Note panel, around a blockquote, under the
-hero headline), and a dozen copies of `1.875rem` each carrying a copy of the
-same "not on the scale" comment is worse than one named value. That is the
-bar for the next one too: a value gets a token when it recurs across
-components, not merely because it is off-scale. A one-off still gets a
-literal and a comment — the 50 of clear space above a prose section heading,
-the 38 the blockquote's quote mark hangs by.
+Some tokens are off Figma's spacing scale, `--space-30` among them. A value
+earns a name when it recurs across components, not merely because it is
+off-scale — 30 is used in about a dozen places in the editorial designs, so
+one named value beats a dozen literals each repeating the same comment.
+Don't inline those back into literals. A genuine one-off still gets a literal
+and a comment, as with the 38 the blockquote's quote mark hangs by.
 
 Mode-dependent colors use `light-dark()`, with `color-scheme: light dark`
 set on `:root`. Where a **whole subtree** should look the same in both
@@ -111,8 +128,8 @@ the outlined style) and a mode-dependent disabled state on the same element —
 one element gets one `color-scheme`, so pinning it would freeze the label to
 near-black on a dark page.
 
-Get dark values from the dark Home panel (node `42:3623`) via
-`get_variable_defs`. Never invent them. Where the design genuinely has no
+Never invent a dark-mode value; the `figma-shared-design` skill says where to
+read them from. Where the design genuinely has no
 value — Figma's pages show buttons only at rest — derive one from a token
 with `color-mix()` rather than picking a hex, and check the result: the
 buttons' hover and pressed fills darken in light mode and lighten in dark,
@@ -166,7 +183,7 @@ a property and its override.
 ### Other conventions
 
 - Modern features are welcome and preferred: logical properties, range media
-  queries (`@media (width < 60rem)`), `color-mix()`, `text-wrap: balance`,
+  queries (`@media (width >= 60rem)`), `color-mix()`, `text-wrap: balance`,
   `100dvh`, `interpolate-size`.
 - The reset lives in a `@layer reset`. Unlayered rules beat layered ones
   whatever their specificity, so component styles win without juggling —
@@ -231,6 +248,62 @@ covers why they are gitignored, why there is deliberately no default export,
 why class names must be camelCase, and why the build has to run before
 `astro check` and ESLint.
 
+## Prose
+
+`prose.css` styles long-form content, scoped with `@scope (.prose) to
+(.prose-end)` so a component can opt out of the prose rules and back in.
+It keeps what has no component — headings, lists, tables, code, definition
+lists — plus the margins that run _between_ blocks, including a blockquote's
+own outer margin. Appearance belongs to the component; spacing between
+siblings belongs to the stylesheet that can see both.
+
+**A construct with a component behind it keeps its styles in that component,
+not in `prose.css`.** Markdown syntax is mapped onto the component in
+`src/components/Prose/index.astro`, so the component is not an alternative to
+authored markup — it _is_ what authored markup renders as. `Blockquote` works
+this way: an author writes `>` and gets it.
+
+A page renders MDX through `<Prose {Content} />` rather than `<Content />`,
+because the `components` mapping has to be passed at every call site and Astro
+has no global equivalent. Routing it through one component means one copy.
+
+Two satteri plugins normalize the markup `prose.css` styles. Each carries its
+full rationale in its own doc comment — read the file before changing it:
+
+- `lib/markdown/loose-blocks.ts` — forces `spread` on every list, item and
+  description, so an author's blank lines don't decide whether list text is
+  wrapped in a `<p>`. `prose.css` then styles `li > p` and `dd > p` alone.
+- `lib/markdown/definition-groups.ts` — a **hast** plugin wrapping each
+  term/description group in a `div`, which the HTML spec allows, so
+  `prose.css` can style `dl > div` instead of inferring the grouping from
+  sibling position.
+
+What this leaves for an author to get right:
+
+- **A list or definition list written as JSX bypasses the markdown parser**,
+  so `looseBlocks` cannot reach it — write the `<p>` in a JSX `li` by hand.
+  `definitionGroups` does reach both forms, since it runs at hast.
+- **In a `dd` written as JSX, leave the text bare.** MDX wraps multi-line text
+  in a paragraph of its own, which is the one the plugin would have produced;
+  an explicit `<p>` around it nests invalidly. Keeping the text on one line to
+  dodge this is not stable, because Prettier rewraps a long line.
+- **Prettier has no definition-list support** — it reads nested markdown pairs
+  as a paragraph and reflows them to the margin — so a nested definition list
+  has to be written as JSX.
+
+When adding a component to the mapping:
+
+- It must render the element it replaces, so authored markup and an explicit
+  call produce the same thing.
+- **Style markdown-generated descendants through `:global()`.** Astro's scope
+  hash lands on the component's root element and never on children that came
+  from markdown, so a bare `& p` compiles to `p[data-astro-cid-…]` and matches
+  nothing. `& :global(p)` compiles to `blockquote[data-astro-cid-…] p`, which
+  is scoped where it needs to be and open where it cannot be.
+- Rules in `prose.css` that reached inside the element have to move with it —
+  a `:is(li, blockquote) > :not(:first-child)` cannot see into the subtree any
+  more.
+
 ## Working with Figma
 
 The design lives in the [`Firefox_for_Developers` Figma file][figma-file].
@@ -245,13 +318,148 @@ load before calling `get_design_context` itself.
 
 [figma-file]: https://www.figma.com/design/JFIeIEWeVOsoEZzMFKupmh/Firefox_for_Developers?node-id=42-1079
 
-Two rules are worth stating here because they bind even when you never open
-Figma: never invent a dark-mode value, and never snap a measured value to the
-nearest token to make it look tokenised — Figma's spacing scale is
-0/8/12/16/20/24/32/40/80, so the 50 above a prose section heading is
-positional and gets a literal `3.125rem` with a comment. The one value named
-without a Figma variable behind it is `--space-30`; see "Design tokens" above
-for what it took to earn that.
+Two rules bind even when you never open Figma: never invent a dark-mode
+value, and never snap a measured value to the nearest token to make it look
+tokenised. A positional value gets a literal and a comment — see "Design
+tokens" above. The skill owns the spacing scale itself, so it is stated in
+one place rather than two.
+
+## Code blocks
+
+Every fenced block is run through Prettier at each width in `TIERS`, every
+distinct result is emitted, and container queries show the widest one that
+fits — so a sample reads well at both full desktop measure and phone width.
+Three files, each documenting its own reasoning in full:
+
+- `lib/markdown/code-widths/format.ts` — `TIERS`, the language→parser map and
+  `formatVariants`. Pure, and the only part with unit tests
+  (`format.test.ts`).
+- `lib/markdown/code-widths/plugin.ts` — the satteri mdast plugin that wraps
+  each block and emits the variants. It runs before Astro's Shiki step, which
+  is what lets one block become several without instantiating a highlighter.
+- `lib/markdown/code-widths/indent-wrap.ts` — a Shiki transformer splitting
+  each line into an indent cell and a content cell, so a line that outruns its
+  tier wraps under its own content instead of back at the gutter. Configured
+  through `markdown.shikiConfig`, because Shiki runs after the mdast plugins.
+
+Before changing any of it, read those doc comments: they cover why the floor
+is 40, why the variants cost almost nothing compressed, and why the indent
+wrapping is the safety net under the whole approach.
+
+Three things bind from outside those files:
+
+- **`TIERS` and the `@container` blocks in `prose.css` are kept in step by
+  hand.** Four blocks is not worth a generator. Getting a tier wrong is not
+  fatal either way — too narrow means more line breaks than necessary, too
+  wide and the indent wrapping catches the overflow.
+- **The container query thresholds are in `ch`, and that is exact rather than
+  an analogy.** A size feature queries the container's content box, which
+  `.code-block`'s padding makes exactly the text area, and a font-relative
+  unit resolves against the container's own computed font. So `48ch` means
+  literally "48 code characters fit", the same question `printWidth` answers.
+- **Declare the font on the `pre` and `code`, not just on the container.** The
+  UA stylesheet declares `font-family: monospace` on both, and an inherited
+  value loses to any declaration including a UA one, so a family on
+  `.code-block` alone never reaches the text — the block then renders at
+  0.602em per character while the query measures Inconsolata's 0.5em, making
+  every threshold 20% optimistic and the chosen variant overflow. Inline
+  `code` hits the same UA declaration, which is why `prose.css` states the
+  family there too.
+
+**Every block is wrapped in `.code-block`, variants or not**, so one set of
+rules owns the block's background, padding and query container however the
+block was treated. A block that opted out, one whose language has no parser
+and one that dedupes to a single variant all produce `.code-block > pre`; only
+a block that genuinely reflows gets `.code-variant` children.
+
+Authoring escape hatches, read off the fence's meta string and stripped from
+it before Shiki sees them:
+
+- ` ```js no-format ` — ship exactly what the author wrote.
+- ` ```js width=80 ` — one variant at a fixed width, for a sample whose point
+  is a particular line layout.
+- `// prettier-ignore` works inside a block, and the directive line itself is
+  removed before the block reaches the reader.
+
+**Don't promise responsive HTML samples**: Prettier's HTML printer barely
+responds to `printWidth` — it breaks one attribute per line and stops — so
+those blocks dedupe to a single variant. That costs nothing, but it isn't a
+feature either.
+
+A block that asked to be formatted and couldn't — an illustrative fragment
+like `if (foo) {` with no closing brace — ships as authored and logs a
+`[code-widths]` line naming the file. A burst of those warnings means the
+language map or the fragment story needs work.
+
+`/test/code/` is the specimen page for all of this, and its column is
+resizable because the tiers are chosen by a container query. The code fences
+in `src/pages/_test/code.mdx` are exempt from Prettier in `.prettierrc`: the
+input formatting is the thing under test there, so it cannot also be
+Prettier's own output.
+
+## Test pages
+
+Specimen pages for checking styles against the design live under
+`src/pages/test/`, one directory per page, and are absent from the production
+build rather than present and hidden.
+
+| Command                           | `/test/*` |
+| --------------------------------- | --------- |
+| `pnpm dev`                        | included  |
+| `pnpm build`                      | omitted   |
+| `INCLUDE_TEST_PAGES=1 pnpm build` | included  |
+| `pnpm check`                      | included  |
+
+`pnpm check` sets `INCLUDE_TEST_PAGES=1` for its build step deliberately.
+A test page is sometimes the only consumer of a piece of `lib/`, and
+`astro check` only type-checks what the build pulled in — so checking the
+production build alone leaves that code unchecked and lets a type error
+reach CI.
+
+Each page gates itself by exporting the shared `getStaticPaths` from
+`src/pages/_test/_test-pages.ts`:
+
+```astro
+---
+import { testPagePaths } from '~/pages/_test/_test-pages';
+export const getStaticPaths = testPagePaths;
+---
+```
+
+That is why every test page is a dynamic route — `test/buttons/[...slug].astro`
+rather than `test/buttons.astro`. Only a dynamic route runs `getStaticPaths`,
+and returning no paths is what drops the page from the build; a static page
+has no equivalent escape hatch. The rest parameter is load-bearing, not
+decorative. `build.format: 'preserve'` renders the single `slug: undefined`
+path at the bare `/test/buttons/`.
+
+`INCLUDE_TEST_PAGES` is declared in `src/env.d.ts`, which `strictest` needs in
+order to read it off `import.meta.env`.
+
+**Write the page's markup in the `.astro` file.** That is the normal case, as
+in `test/buttons/`: a component matrix is not authored content, so there is no
+markdown an author would write that produces it.
+
+**Use MDX only for what is actually authored as markdown** — currently just
+prose. `test/prose/` imports `_test/prose.mdx` so the content goes through the
+real pipeline, `satteri` included, and tests what an author's markdown
+produces rather than hand-written HTML that could drift from it. MDX content
+lives in `_test/`, which Astro leaves out of routing, so the file does not
+become a route of its own.
+
+Two MDX traps, both of which have already produced wrong output here:
+
+- **Bare text on its own line inside a JSX block is still markdown**, so MDX
+  wraps it in a `<p>`. In a blockquote footer that paragraph inherits the
+  `blockquote p` rule and overrides the footer's own `body-xs`. Use the
+  `Blockquote` component rather than hand-writing the footer.
+- **Don't write an explicit `<p>` around multi-line slot content** — MDX adds
+  its own, giving invalid nested `<p><p>`. Leave the text bare and let MDX
+  make the paragraph.
+
+Prettier also rewrites a block `{/* … */}` comment between markdown blocks
+into `{/_ … _/}`, which breaks the build. Keep MDX comments on one line inside
+JSX, or write the explanation as prose on the page.
 
 ## Not yet built
 
@@ -260,4 +468,12 @@ the design only specifies text. They need checking against what the team
 actually intends.
 
 Only desktop frames (1440px) exist in Figma, so responsive behavior below
-that is an interpretation rather than a spec.
+that is an interpretation rather than a spec. The code block's inline padding
+holding at 1rem until 30rem is one such interpretation: the design's 2rem
+either side is a fifth of the text area on a phone.
+
+Syntax highlighting is still Shiki's stock `github-dark`, so the
+`--color-code-*` tokens the design specifies are unused and `.code-block`
+pins `color-scheme: dark` to keep that theme legible in both schemes. Moving
+to the design's palette means configuring a Shiki theme against those tokens
+and deleting that one line.

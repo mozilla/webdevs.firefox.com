@@ -1,0 +1,489 @@
+/**
+ * Prose styles for long-form content.
+ * Uses donut scoping so inner components can opt out of the prose styles & back again.
+ */
+@scope (.prose) to (.prose-end) {
+  :scope {
+    color: var(--color-text);
+    font-size: var(--text-body-main);
+    line-height: var(--leading-body-main);
+    text-box: trim-both cap alphabetic;
+    container-type: inline-size;
+
+    & > :first-child {
+      /* Revisit this once margin-trim is baseline */
+      margin-block-start: 0;
+    }
+  }
+
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  dl,
+  .code-block,
+  blockquote,
+  figure,
+  .table-scroll,
+  hr,
+  footer {
+    margin-block: var(--space-40);
+  }
+
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  dl,
+  blockquote,
+  figure,
+  .table-scroll,
+  hr,
+  footer {
+    text-box: trim-both cap alphabetic;
+    margin-block: var(--space-40);
+  }
+
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-block-start: var(--space-45);
+  }
+
+  li p {
+    margin-block: var(--space-30);
+  }
+
+  h2 {
+    counter-increment: prose-section;
+    color: var(--color-heading);
+    font-family: var(--font-mozilla-headline);
+    font-size: var(--text-title-sm);
+    font-weight: 600;
+    line-height: var(--leading-title-sm);
+    margin-block-start: var(--space-80);
+
+    &::before {
+      content: '// ' counter(prose-section, decimal-leading-zero);
+      display: block;
+      padding-block-start: var(--space-8);
+      margin-block-end: var(--space-16);
+      border-block-start: 0.0625rem solid currentColor;
+      color: var(--color-purple);
+      font-size: var(--text-label-xs-caps);
+      line-height: 1;
+      text-box: trim-both cap alphabetic;
+    }
+  }
+
+  h3 {
+    color: var(--color-heading);
+    font-family: var(--font-mozilla-headline);
+    font-size: var(--text-title-xs);
+    font-weight: 600;
+    line-height: var(--leading-title-xs);
+  }
+
+  /* Simple 'heading-like' styles */
+  h4,
+  h5,
+  h6,
+  dt,
+  th {
+    color: var(--color-heading);
+    font-family: var(--font-mozilla-headline);
+    font-size: var(--text-title-xxs);
+    font-weight: 600;
+    line-height: var(--leading-title-xxs);
+  }
+
+  /*
+   * Prevent sub and sup impacting line height.
+   */
+  sub,
+  sup {
+    position: relative;
+    vertical-align: baseline;
+    font-size: 0.75em;
+    line-height: 0;
+  }
+
+  sup {
+    inset-block-end: 0.35em;
+  }
+
+  sub {
+    inset-block-start: 0.2em;
+  }
+
+  a {
+    color: var(--color-heading);
+    text-decoration-color: var(--color-link-purple);
+    text-decoration-thickness: 0.0625rem;
+    text-underline-offset: 0.125em;
+
+    &:hover {
+      text-decoration-thickness: 0.125rem;
+    }
+
+    /* External link markers */
+    &[href^='http']:not([href^='https://webdevs.firefox.com'])::after {
+      content: '';
+      display: inline-block;
+      width: 0.75rem;
+      height: 1em;
+      margin-inline-start: 0.125rem;
+      vertical-align: middle;
+      background-color: var(--color-link-purple);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 16'%3E%3Cpath d='M2.25 3c-.83 0-1.5.67-1.5 1.5v7.25c0 .83.67 1.5 1.5 1.5H9.5c.83 0 1.5-.67 1.5-1.5v-3H9.75v3q-.02.23-.25.25H2.25a.25.25 0 0 1-.25-.25V4.5c0-.14.11-.25.25-.25h3V3z'/%3E%3Cpath d='m10.15 7.15-1.2-1.2-2.5 2.5-.9-.9 2.5-2.5-1.2-1.2A.5.5 0 0 1 7.21 3h3.29c.28 0 .5.22.5.5v3.3a.5.5 0 0 1-.85.35'/%3E%3C/svg%3E");
+      mask-repeat: no-repeat;
+      mask-position: left center;
+      mask-size: 0.75rem 1rem;
+    }
+  }
+
+  /* Lists */
+  ul,
+  ol {
+    padding-inline-start: 0;
+    margin: 0;
+    --bullet-size: 0.5rem;
+    --bullet-column: 1.125rem;
+    margin-inline-start: var(--bullet-column);
+  }
+
+  ol {
+    margin-inline-start: 2ch;
+
+    & > li {
+      padding-inline-start: var(--space-16);
+    }
+  }
+
+  ol > li::marker {
+    color: var(--color-purple);
+  }
+
+  ul > li {
+    list-style: none;
+    /* For positioning the bullet */
+    position: relative;
+
+    /* The bullet */
+    &::before {
+      content: '';
+      position: absolute;
+      inset-inline-start: calc(-1 * var(--bullet-column));
+      inset-block-start: 0.13em;
+      width: var(--bullet-size);
+      height: var(--bullet-size);
+      border-radius: 50%;
+      background-color: var(--color-purple);
+    }
+  }
+
+  /* Nested bullets (unfilled circles) */
+  ul ul > li::before {
+    border: 0.0625rem solid var(--color-purple);
+    background-color: transparent;
+  }
+
+  ol > li::marker {
+    content: counter(list-item, decimal-leading-zero) '\a0';
+  }
+
+  ol ol {
+    margin-inline-start: var(--space-16);
+
+    & > li::marker {
+      content: counter(list-item, upper-alpha) '\a0';
+    }
+  }
+
+  /*
+   * Definition lists
+   */
+  dt {
+    margin: 0;
+    text-box: trim-both cap alphabetic;
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  dl > div {
+    padding-block-start: var(--space-16);
+    border-block-start: 0.0625rem solid var(--color-border);
+
+    /* Wide enough for two columns, at which point the term moves alongside. */
+    @container (width >= 26rem) {
+      /* Narrow: the term sits above its description in one column. */
+      display: grid;
+      gap: var(--space-16) 0;
+      grid-template-columns: 1fr 2fr;
+      align-items: start;
+      padding-block-end: var(--space-30);
+      grid-auto-flow: dense;
+
+      & dt {
+        grid-column: 1;
+      }
+      & dd {
+        grid-column: 2;
+        /* Replace with margin-trim later */
+        &:not(dd + dd) > :first-child {
+          margin-block-start: 0;
+        }
+        & > :last-child {
+          margin-block-end: 0;
+        }
+      }
+    }
+  }
+
+  /*
+   * Nested definition lists
+   *
+   * The design nests these beneath the description with a left rule instead of
+   * a second pair of columns, so the group box drops back to one column.
+   */
+  dd > dl {
+    margin-block: var(--space-30);
+
+    & > div {
+      padding: 0;
+      border: none;
+      display: block;
+    }
+
+    & dt {
+      margin-block: var(--space-45) var(--space-16);
+    }
+
+    & dd {
+      padding-inline-start: var(--space-16);
+      border-inline-start: 0.0625rem solid var(--color-border);
+
+      /* Replace with margin-trim later */
+      & > :first-child {
+        margin-block-start: 0;
+      }
+      & > :last-child {
+        margin-block-end: 0;
+      }
+    }
+  }
+
+  /*
+   * Inline Code (the scope stops it from affecting code blocks)
+   */
+  @scope (:scope) to (.code-block) {
+    code {
+      padding: 0.25rem 0.1875rem;
+      background-color: var(--color-background-spot);
+      color: var(--color-code-text);
+      font-family: var(--font-inconsolata);
+      font-size: 1em;
+      line-height: 1.65;
+    }
+  }
+
+  /*
+   * Code blocks
+   */
+  .code-block {
+    padding: var(--space-16);
+    border-radius: 0.75rem;
+    background-color: var(--color-background-spot);
+    color: var(--color-code-text);
+    /* Stated here so ch units work in container queries */
+    font-family: var(--font-inconsolata);
+    font-size: var(--text-body-main);
+    line-height: 1.65;
+
+    /* The light theme is TODO */
+    color-scheme: dark;
+
+    /* For 'responsive code' container queries */
+    container: code / inline-size;
+
+    /* The design's 32 either side is a fifth of the text area on a phone, so
+       the wider inline padding waits for room to spend on it. */
+    @media (width >= 30rem) {
+      padding-inline: var(--space-32);
+    }
+
+    /* Overriding Shiki stuff */
+    & pre {
+      margin: 0;
+      background-color: transparent !important;
+    }
+
+    /* Load-bearing. Ensure custom font is used. */
+    & :is(pre, code) {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    /*
+     * Per-line indent wrapping (lib/markdown/code-widths/indent-wrap.ts).
+     *
+     * Each line is two cells: its leading indentation, then the rest. A line
+     * Prettier could not fit into the tier — it never breaks inside a comment
+     * and cannot break a long identifier — wraps within the second column, so
+     * the continuation lines up under the start of the line's content instead
+     * of back at the gutter.
+     *
+     * When changing how this works, be careful that you don't break copying.
+     * Each browser handles it slightly differently and this combination
+     * works reliably.
+     */
+    & .line {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      /* A blank line has no content - this ensures it doesn't collapse */
+      min-height: 1lh;
+    }
+
+    & .indent {
+      white-space: pre;
+      /* Grid cells copy as separate lines, which would split every indented
+         line in two. The indent that actually gets copied is the mirror of
+         this one inside `.content`, so this cell is left out of selection. */
+      user-select: none;
+    }
+
+    & .content {
+      white-space: pre-wrap;
+      /* A long unbroken token — a URL, a hash — breaks rather than
+         overflowing the column. */
+      overflow-wrap: break-word;
+    }
+
+    & .copy-indent {
+      /* Takes no visible space, so the grid above is unaffected, but stays in
+         the clipboard, so a copied line keeps its indentation and arrives as
+         one line. `font-size: 0` does that in both engines, unlike
+         `width: 0; overflow: hidden`, which Chrome drops from the copy. */
+      font-size: 0;
+      white-space: pre;
+      user-select: text;
+    }
+  }
+
+  /*
+   * Container queries to display the right code variant based on the block's width.
+   */
+  .code-block > .code-variant {
+    display: none;
+  }
+  .code-block > .tier-40 {
+    display: block;
+  }
+
+  @container code (width >= 48ch) {
+    .code-block > .code-variant {
+      display: none;
+    }
+    .code-block > .tier-48 {
+      display: block;
+    }
+  }
+  @container code (width >= 56ch) {
+    .code-block > .code-variant {
+      display: none;
+    }
+    .code-block > .tier-56 {
+      display: block;
+    }
+  }
+  @container code (width >= 64ch) {
+    .code-block > .code-variant {
+      display: none;
+    }
+    .code-block > .tier-64 {
+      display: block;
+    }
+  }
+  @container code (width >= 72ch) {
+    .code-block > .code-variant {
+      display: none;
+    }
+    .code-block > .tier-72 {
+      display: block;
+    }
+  }
+  @container code (width >= 79ch) {
+    .code-block > .code-variant {
+      display: none;
+    }
+    .code-block > .tier-79 {
+      display: block;
+    }
+  }
+
+  @media print {
+    /* Paper is wide, and has no container to query. */
+    .code-block > .code-variant {
+      display: none;
+    }
+    .code-block > .code-variant:last-child {
+      display: block;
+    }
+  }
+
+  /*
+   * Tables
+   */
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  th,
+  td {
+    padding: var(--space-16);
+    border: 0.0625rem solid var(--color-border);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  td {
+    /* Cells are the tighter 1.4 body leading, not running-prose 1.85. */
+    line-height: var(--leading-body);
+  }
+
+  caption {
+    margin-block-start: var(--space-16);
+    color: var(--color-text);
+    font-size: var(--text-body-xs);
+    line-height: var(--leading-body);
+    text-align: start;
+    caption-side: bottom;
+
+    /* Replace with margin-trim later */
+    & > :first-child {
+      margin-block-start: 0;
+    }
+    & > :last-child {
+      margin-block-end: 0;
+    }
+  }
+
+  hr {
+    width: 100%;
+    height: 0.0625rem;
+    border: none;
+    background-color: var(--color-border);
+  }
+}

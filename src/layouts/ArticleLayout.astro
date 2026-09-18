@@ -1,0 +1,220 @@
+---
+/**
+ * The editorial article shell: the purple gradient band, a centered hero, and
+ * a rounded content card holding the prose beside a sticky table of contents.
+ */
+import SiteLayout from '~/layouts/SiteLayout.astro';
+import '~/styles/prose.css';
+
+interface Props {
+  title: string;
+  description?: string | undefined;
+  /**
+   * The prose's `h2`s, which become the contents list. An empty list drops
+   * the nav entirely rather than rendering an empty one.
+   */
+  sections?: { slug: string; text: string }[] | undefined;
+  /** Passed through to `MainLayout`, which documents it. */
+  preloadCodeFont?: boolean | undefined;
+}
+
+const { title, description, sections = [], preloadCodeFont } = Astro.props;
+---
+
+<SiteLayout
+  title={title}
+  description={description}
+  headerOverlay
+  {preloadCodeFont}
+>
+  <article>
+    <div class="hero">
+      <div class="hero-inner wrapper">
+        <slot name="hero" />
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-inner wrapper">
+        {/*
+          Written before the prose so that the default layout, which stacks the
+          contents above the article, agrees with the reading and tab order.
+          Wide viewports place it in the second column instead.
+        */}
+        {sections.length > 0 && (
+          <nav class="toc" aria-labelledby="toc-heading">
+            <p class="toc-heading" id="toc-heading">
+              Table of Contents
+            </p>
+            <ol class="toc-list" role="list">
+              {sections.map(({ slug, text }) => (
+                <li>
+                  <a href={`#${slug}`}>{text}</a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
+
+        <div class="prose">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </article>
+</SiteLayout>
+
+<style>
+  article {
+    /* The gradient's last stop, continued flat below its extent. */
+    --gradient-end: #210340;
+
+    background-color: var(--gradient-end);
+    background-image: radial-gradient(
+      97.33rem 54.5625rem ellipse at 50% -16.90625rem,
+      #ae49ec 0%,
+      #8b38c1 25%,
+      #682696 50%,
+      #44156b 75%,
+      #330c56 87.5%,
+      var(--gradient-end) 100%
+    );
+    background-repeat: no-repeat;
+  }
+
+  /*
+   * Hero — Figma node `42:1663`. Pins `color-scheme: dark` so the tag and
+   * headline read --color-heading the normal way round rather than carrying
+   * a second set of values; the header above it does the same, via
+   * `headerOverlay`.
+   */
+  .hero {
+    color-scheme: dark;
+    color: var(--color-heading);
+  }
+
+  .hero-inner {
+    display: grid;
+    justify-items: center;
+    /* 30 between the tag and the headline; the date's own margin adds the
+       remainder of the 60 below it. */
+    gap: var(--space-30);
+    /* Clears the header, which overlaps this row. */
+    padding-block: 10.1875rem var(--space-80);
+    text-align: center;
+  }
+
+  /*
+   * Content panel — Figma node `42:1616`. A rounded card that rises over the
+   * gradient and runs to the foot of the article.
+   */
+  .panel {
+    /* Narrow enough that the gutter costs more than the inset is worth: the
+       card goes full-bleed and its sides meet the viewport, leaving the
+       corners to mark the top edge on their own. */
+    margin-inline: 0;
+    border-start-start-radius: 1.5rem;
+    border-start-end-radius: 1.5rem;
+    background-color: var(--color-background-main);
+    box-shadow: 0 0.25rem 1.25rem rgb(0 0 0 / 0.15);
+
+    /* Room for the inset: the gutter is carved out of the page cap, so the
+       card sits inside it on both sides rather than running full-bleed. */
+    @media (width >= 30rem) {
+      margin-inline: var(--gutter);
+    }
+
+    /* The design's 48 radius is drawn for a 1408-wide card; it only stops
+       eating a noticeable share of the width once the card is this wide. */
+    @media (width >= 48rem) {
+      border-start-start-radius: 3rem;
+      border-start-end-radius: 3rem;
+    }
+  }
+
+  .panel-inner {
+    display: grid;
+    /* Too narrow for the TOC to sit beside the prose, so it stacks above —
+       which is also its markup order. The prose column is capped at the
+       design's 43.5rem throughout. */
+    grid-template-areas:
+      'toc'
+      'prose';
+    grid-template-columns: minmax(0, 43.5rem);
+    justify-content: center;
+    gap: var(--space-40);
+    padding-block: var(--space-40) var(--space-80);
+
+    /* Room for the TOC's 13.8125rem beside the prose, with the pair centered
+       in the card. The areas put the TOC second visually even though it comes
+       first in the markup. */
+    @media (width >= 75rem) {
+      grid-template-areas: 'prose toc';
+      grid-template-columns:
+        minmax(0, 43.5rem)
+        minmax(0, 13.8125rem);
+      gap: var(--space-80);
+      padding-block-start: 7.5rem;
+    }
+  }
+
+  .prose {
+    grid-area: prose;
+  }
+
+  /*
+   * Table of contents
+   */
+  .toc {
+    grid-area: toc;
+    display: grid;
+    gap: var(--space-12);
+    align-content: start;
+    font-size: var(--text-label-xs-caps);
+    font-weight: 500;
+    line-height: var(--leading-body);
+    text-box: trim-both cap alphabetic;
+  }
+
+  .toc-heading {
+    color: var(--color-purple);
+    text-box: trim-both cap alphabetic;
+
+    /* Decorative, and this heading is the nav's accessible name, so the
+       slashes are drawn rather than written — as in prose.css's `// 01`. */
+    &::before {
+      content: '// ';
+    }
+  }
+
+  .toc-list {
+    display: grid;
+    gap: var(--space-12);
+    /* The numbers hang in their own column so the labels align. */
+    counter-reset: toc;
+
+    & li {
+      display: grid;
+      grid-template-columns: 1rem 1fr;
+      gap: var(--space-8);
+      counter-increment: toc;
+
+      &::before {
+        content: counter(toc, decimal-leading-zero);
+        color: var(--color-link-purple);
+        text-box: trim-both cap alphabetic;
+      }
+    }
+
+    & a {
+      color: var(--color-heading);
+      line-height: 1.25;
+      text-decoration: none;
+      text-box: trim-both cap alphabetic;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+</style>

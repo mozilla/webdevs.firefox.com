@@ -1,0 +1,423 @@
+---
+title: Prose kitchen sink
+---
+
+import Blockquote from '~/components/Blockquote';
+import Note from '~/components/Note';
+
+This page exercises every block and inline construct the prose styles cover,
+so a change to `prose.css` can be checked against all of them at once. The
+elements and their content follow Figma's "Components" frame (node
+`42:2023`), which is the design's own specimen sheet.
+
+It opens with two paragraphs in a row, because the space between them is a
+different measurement from the space below a heading, and only adjacent
+paragraphs show it.
+
+## Headings
+
+The section heading above is an `h2`, which the stylesheet numbers in CSS —
+this is the first, so it reads `// 01`. The counter comes from document
+order, so adding a section anywhere renumbers the rest.
+
+### Third-level heading
+
+An `h3` is the heading family at `title-xs`, with no rule or counter.
+
+#### Fourth-level heading
+
+`h4` is the same size as body text and distinguished by family and weight
+alone. It shares its treatment with definition-list terms and table headers.
+
+##### Fifth-level heading
+
+###### Sixth-level heading
+
+`h5` and `h6` both fall back to the `h4` treatment, since the design stops
+at four levels. They appear here so that a future change to any of them is
+visible rather than silent.
+
+## Lists
+
+An unordered list, whose markers are drawn as circles rather than font
+glyphs. Every item here runs to several lines, because a marker's alignment
+against the first line and the indent of the lines below it are the two
+things most easily got wrong, and a one-line item shows neither:
+
+- A first item long enough to wrap over three or four lines at the prose
+  column's full width, which is what shows whether the bullet sits level with
+  the cap height of the first line rather than with its ascender, and whether
+  the continuation lines hang clear of the marker column instead of tucking
+  back underneath it.
+- A second item, also several lines long, so the spacing between two
+  multi-line items can be compared against the spacing between two short
+  ones — they should be the same, and a leading bug in the marker's
+  positioning tends to show up as a difference here.
+- A third item with a nested list, whose markers are outlined rather than
+  filled:
+  - A nested item that also wraps over several lines, so the nested bullet's
+    alignment and the nested continuation indent can be read at the same
+    time. The nested marker column is the one most likely to drift, since it
+    inherits the outer list's indent as well as its own.
+  - Another nested item, short.
+    - A third-level item, which reuses the nested treatment and is written
+      long enough to wrap so the third level's indent is visible too.
+- A fourth item, after the nesting closes, long enough to wrap so the return
+  to the outer indent is unambiguous.
+
+An ordered list, numbered `01`, `02` at the top level and `a`, `b` below. The
+numbers sit in a wider column than the bullets, so the wrapped lines have a
+different indent to check:
+
+1. A first item long enough to wrap over several lines, which shows whether
+   the continuation lines align with the item's text rather than with the
+   number hanging to its left.
+2. A second item, also multi-line, so that consecutive wrapped items can be
+   compared. Two-digit numbers are worth reaching as well, since the counter
+   is `decimal-leading-zero` and `10` onwards is a character wider than `01`.
+3. A third item with a nested ordered list:
+   1. A nested item that wraps over several lines, switching to lower-alpha
+      markers, so the nested number column's width and the wrapped indent
+      beneath it are both legible.
+   2. Another nested item, written long enough to wrap as well, because the
+      second item is where an off-by-one in the marker column would first
+      become obvious.
+4. A fourth item, long enough to wrap, closing the list at the outer indent.
+
+A longer ordered list, which reaches the two-digit numbers where the marker
+column has to accommodate a wider counter:
+
+1. The first of eleven.
+2. The second.
+3. The third.
+4. The fourth.
+5. The fifth.
+6. The sixth.
+7. The seventh.
+8. The eighth.
+9. The ninth.
+10. The tenth, where the counter becomes two digits and the text should stay
+    aligned with the items above rather than shifting right.
+11. The eleventh, long enough to wrap so the two-digit marker's continuation
+    indent is visible.
+
+An ordered list with `start`, which works because the markers are real list
+markers rather than a hand-rolled counter. Written as JSX rather than
+markdown, so it bypasses the parser and `loose-blocks.ts` cannot reach it — the
+paragraphs are explicit here to match what markdown produces:
+
+<ol start="8">
+  <li>
+    <p>An eighth item.</p>
+  </li>
+  <li>
+    <p>A ninth item.</p>
+  </li>
+</ol>
+
+A list item containing more than one paragraph, which sits at the tighter
+spacing that groups a single thought rather than the wider spacing that
+separates items:
+
+- An item whose first paragraph introduces something and is long enough to
+  wrap, so the paragraph spacing inside an item can be told apart from the
+  wrapped-line spacing within a paragraph.
+
+  A second paragraph inside the same item, also long enough to wrap. It
+  should align with the first paragraph's text, not with the marker, and the
+  gap above it should be visibly tighter than the gap between two items.
+
+  A third paragraph, to confirm the spacing is consistent between successive
+  paragraphs in an item rather than only applying to the second.
+
+- A following item, which establishes the wider inter-item spacing that the
+  paragraph spacing above is meant to contrast with.
+
+The same in an ordered list, where the multi-paragraph item has to clear the
+wider number column:
+
+1. An item whose first paragraph is long enough to wrap over several lines.
+
+   A second paragraph inside the same numbered item, which should align with
+   the first paragraph's text rather than with the number.
+
+2. A following numbered item.
+
+A list item containing a nested list after a paragraph, which is the shape a
+list of options with explanations usually takes:
+
+- An item that introduces a nested list in a paragraph long enough to wrap
+  over more than one line:
+
+  - A nested item beneath the paragraph, long enough to wrap.
+  - Another nested item.
+
+- A following item at the outer level.
+
+## Links
+
+A paragraph with an [internal link](/release-notes/2026/158/) and an
+[external link](https://developer.mozilla.org/), which carries the external
+marker. A [link to this site's own host](https://webdevs.firefox.com/) is
+treated as internal and gets no marker, and an
+[anchor on this page](#tables) is internal too.
+
+Inline code can be a link on its own: the
+[`AbortSignal`](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)
+interface, which is code, a link and external all at once, so the marker has
+to sit outside the code's background rather than inside it. An
+[`internal code link`](/release-notes/2026/158/) has code and link styling
+but no marker.
+
+## Inline elements
+
+A paragraph with inline `code`, **bold text**, _italic text_, **_bold
+italic_**, a `code` span immediately followed by punctuation, and a longer
+`document.querySelector('#some-very-long-selector-name')` that may need to
+wrap. Also <abbr title="Cascading Style Sheets">CSS</abbr> as an
+abbreviation, ~~struck-through text~~, and <kbd>Ctrl</kbd> + <kbd>C</kbd> as
+keyboard keys.
+
+Subscripts and superscripts must not disturb the leading, so they are set
+here in a paragraph long enough to wrap over several lines with the marked-up
+line in the middle of it. The lines above and below are what make a shift
+visible: a raised or lowered glyph that still counts towards its line box
+adds a few pixels to that line alone, which reads as a gap opening up mid
+paragraph. So — water is H<sub>2</sub>O and a square is x<sup>2</sup>, both
+sitting on this line, and the baseline spacing either side of it should be
+indistinguishable from the spacing between any other two lines in the
+paragraph. Here is further text to carry the paragraph past the marked-up
+line so there is something beneath it to compare against.
+
+Several in one line, including a nested case where a superscript sits inside
+another: C<sub>6</sub>H<sub>12</sub>O<sub>6</sub>, e = mc<sup>2</sup>,
+2<sup>32</sup> − 1, and x<sup>n<sup>2</sup></sup>.
+
+Running prose has enough leading that the browser's own sub and sup styles
+would not disturb it. The tighter `--leading-body` contexts are where they
+would, so the table below puts them in cells: the row holding them should be
+exactly as tall as the rows that don't.
+
+| Formula                                  | Name       | Note                       |
+| ---------------------------------------- | ---------- | -------------------------- |
+| C<sub>6</sub>H<sub>12</sub>O<sub>6</sub> | Glucose    | Subscripts in a cell.      |
+| 2<sup>32</sup> − 1                       | Max uint32 | A superscript in a cell.   |
+| H<sub>2</sub>O and x<sup>2</sup>         | Both       | Both in one cell.          |
+| Plain text with no markup                | Control    | For comparing row heights. |
+
+## Definition lists
+
+A definition list, whose terms reuse the heading treatment and whose
+descriptions sit in a second column, per node `42:2054`:
+
+xCoord
+: The pixel along the horizontal axis of the element that you want displayed
+in the upper left.
+
+yCoord
+: The pixel along the vertical axis of the element that you want displayed in
+the upper left.
+
+Unfortunately the formatter messes up nested definition lists & multiple paragraphs, so you need to go semi-manual:
+
+<dl>
+  <div>
+    <dt>clip</dt>
+    <dd>
+      Specifies the rectangular region of the element to display.
+
+      This is an additional paragraph within the same description.
+    </dd>
+
+  </div>
+
+  <div>
+    <dt>options</dt>
+    <dd>
+      An object containing the following properties, which the design nests
+      beneath the description with a left rule:
+
+      <dl>
+        <div>
+          <dt>top</dt>
+          <dd>
+            Specifies the number of pixels along the Y axis to scroll the window or
+            element.
+          </dd>
+        </div>
+        <div>
+          <dt>left</dt>
+          <dd>
+            Specifies the number of pixels along the X axis to scroll the window or
+            element.
+          </dd>
+        </div>
+      </dl>
+
+    </dd>
+
+  </div>
+</dl>
+
+A term with two descriptions, and two terms sharing one description:
+
+fetch
+: Starts the process of fetching a resource from the network.
+: Returns a promise that resolves to a `Response`.
+
+setTimeout
+clearTimeout
+: A pair of terms that share a single description.
+
+## Blockquotes
+
+Markdown's `>` syntax renders as the `Blockquote` component, so the two
+quotes at the foot of this section and the two explicit calls below it are the
+same component and should be indistinguishable apart from the attribution.
+That is the point of the mapping: the component is what authored markdown
+renders as rather than an alternative to it.
+
+An attribution is the one part markdown cannot express, so it needs the
+explicit form:
+
+<Blockquote>
+  A quotation, set in the heading family with a large purple quote mark
+  hanging in the margin beside its first line.
+
+  <Fragment slot="name">Name Lastname</Fragment>
+  <Fragment slot="role">Position or Title</Fragment>
+</Blockquote>
+
+An attribution with a name but no role, which drops the `cite`:
+
+<Blockquote>
+  A quotation credited to someone without a title given.
+
+  <Fragment slot="name">Name Lastname</Fragment>
+</Blockquote>
+
+A quote without attribution, which is the more common case in running prose:
+
+> A shorter quotation, with no footer beneath it.
+
+A quote containing more than one block:
+
+> A first paragraph inside the quote.
+>
+> A second paragraph, which sits at the tighter spacing that groups the two
+> into one thought.
+
+## Tables
+
+<table>
+  <caption>
+    Caption is here. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    Nunc vulputate libero et velit interdum, ac aliquet odio mattis.
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Property</th>
+      <th scope="col">Value</th>
+      <th scope="col">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">
+        <code>scroll-behavior</code>
+      </th>
+      <td>
+        <code>smooth</code>
+      </td>
+      <td>Scrolls in a smooth fashion using a user-agent-defined easing.</td>
+    </tr>
+    <tr>
+      <th scope="row">
+        <code>overscroll-behavior</code>
+      </th>
+      <td>
+        <code>contain</code>
+      </td>
+      <td>Prevents scroll chaining to the parent scroll container.</td>
+    </tr>
+  </tbody>
+</table>
+
+A table written as markdown, which is the form an author is most likely to
+use, and wide enough to need horizontal scrolling inside the text column:
+
+| Feature            | Chrome | Firefox | Safari | Notes                             |
+| ------------------ | ------ | ------- | ------ | --------------------------------- |
+| `text-box-trim`    | 133    | 140     | 18.2   | Shipped across all three engines. |
+| `interpolate-size` | 129    | No      | No     | Behind a preference in Firefox.   |
+| `@scope`           | 118    | 146     | 17.4   | Used by this very stylesheet.     |
+
+## Code
+
+A fenced code block, which sets its own background and padding so the inline
+treatment does not double up:
+
+```css
+::picker(select) {
+  margin: 0;
+  inset: auto;
+  min-inline-size: anchor-size(self-inline);
+  max-block-size: stretch;
+  position-area: self-block-end span-self-inline-end;
+  position-try-fallbacks:
+    flip-block,
+    flip-inline,
+    flip-block flip-inline;
+}
+```
+
+A code block with a long line that has to scroll rather than widen the text
+column:
+
+```js
+const observer = new IntersectionObserver(
+  (entries) =>
+    entries.forEach((entry) =>
+      entry.target.classList.toggle('visible', entry.isIntersecting),
+    ),
+  { rootMargin: '0px 0px -25% 0px' },
+);
+```
+
+A code block with no language, and one that is a single short line:
+
+```
+$ pnpm dev
+```
+
+## Notes
+
+<Note>
+  A note panel, which stops the prose scope at its boundary and opens a fresh
+  one inside, so authored markdown keeps its element styles while the panel sets
+  its own padding and heading.
+</Note>
+
+<Note type="warning">
+  A warning, which uses the same panel with a different heading. It can
+  contain its own blocks, including a list:
+
+- A first item inside the panel.
+- A second item.
+
+And inline `code`, plus an [external link](https://developer.mozilla.org/).
+
+</Note>
+
+<Note type="info">
+  An info panel, the third of the three headings the component maps.
+</Note>
+
+## Rules and figures
+
+A thematic break, which is the last block-level element the stylesheet
+covers:
+
+---
+
+Hello!

@@ -1,0 +1,100 @@
+---
+import SiteLayout from '~/layouts/SiteLayout.astro';
+import Button from '~/components/Button';
+import { testPagePaths } from '~/pages/_test/_test-pages';
+
+/**
+ * Button specimen, at `/test/buttons/` — the Size × Style matrix from Figma's
+ * Buttons set (node `43:6818`), with the states the design draws beside it.
+ *
+ * Markup rather than MDX, because a component matrix is not authored content:
+ * there is no markdown an author would write that produces it, so routing it
+ * through the MDX pipeline would test nothing the prose page doesn't already
+ * cover. This is the shape most test pages will take — see `_test-pages.ts`.
+ *
+ * Hover, pressed and focus are real CSS states and cannot be forced from
+ * markup, so the matrix covers what is reachable declaratively and the rest
+ * is checked by interacting with the page.
+ */
+export const getStaticPaths = testPagePaths;
+
+const sizes = ['large', 'medium', 'small', 'compact'] as const;
+const styles = ['filled', 'outlined'] as const;
+---
+
+<SiteLayout title="Button specimen">
+  <div class="wrapper">
+    <h1>Buttons</h1>
+
+    {styles.map((style) => (
+      <section>
+        <h2>{style}</h2>
+        <div class="row">
+          {sizes.map((size) => (
+            <Button size={size} style={style}>
+              {size}
+            </Button>
+          ))}
+        </div>
+
+        <h3>Disabled</h3>
+        <div class="row">
+          {sizes.map((size) => (
+            <Button size={size} style={style} disabled>
+              {size}
+            </Button>
+          ))}
+        </div>
+
+        <h3>As links</h3>
+        <div class="row">
+          <Button style={style} href="/">
+            Link
+          </Button>
+          <Button style={style} href="/" disabled>
+            Disabled link
+          </Button>
+        </div>
+      </section>
+    ))}
+  </div>
+</SiteLayout>
+
+<style>
+  .wrapper {
+    display: grid;
+    gap: var(--space-40);
+    align-content: start;
+    padding-block: var(--space-40);
+  }
+
+  section {
+    display: grid;
+    gap: var(--space-16);
+    align-content: start;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--color-heading);
+    font-family: var(--font-mozilla-headline);
+  }
+
+  h2 {
+    text-transform: capitalize;
+  }
+
+  h3 {
+    font-size: var(--text-title-xxs);
+  }
+
+  /* Flex, not grid: the buttons are a variable-length row that should wrap on
+     a narrow viewport, which grid cannot do. */
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-16);
+    align-items: center;
+  }
+</style>

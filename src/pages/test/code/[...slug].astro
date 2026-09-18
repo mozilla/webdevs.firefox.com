@@ -1,0 +1,53 @@
+---
+import SiteLayout from '~/layouts/SiteLayout.astro';
+import Prose from '~/components/Prose';
+import { testPagePaths } from '~/pages/_test/_test-pages';
+import { Content, frontmatter } from '~/pages/_test/code.mdx';
+import '~/styles/prose.css';
+
+/**
+ * Code block specimen, at `/test/code/` — every case `codeWidths` and the
+ * indent-wrap transformer have to handle, on one page.
+ *
+ * The column is resizable rather than fixed, because the thing under test is
+ * how a block responds to the width it is given: the tiers are chosen by a
+ * container query on the block, so dragging the column is the only way to see
+ * all of them without a device lab. It starts at the article measure the
+ * tiers were derived from.
+ *
+ * `SiteLayout` rather than `ArticleLayout`: the article chrome would fix the
+ * prose column's width, which is exactly what this page needs to vary.
+ */
+export const getStaticPaths = testPagePaths;
+
+const { title } = frontmatter as { title: string };
+---
+
+<SiteLayout title={title}>
+  <div class="page wrapper">
+    <h1>{title}</h1>
+
+    <div class="prose">
+      <Prose {Content} />
+    </div>
+  </div>
+</SiteLayout>
+
+<style>
+  .page {
+    display: grid;
+    gap: var(--space-40);
+    justify-content: center;
+    grid-template-columns: minmax(0, 43.5rem);
+    padding-block: var(--space-40) var(--space-80);
+  }
+
+  h1 {
+    color: var(--color-heading);
+    font-family: var(--font-mozilla-headline);
+    font-size: var(--text-title-sm);
+    font-weight: 600;
+    line-height: var(--leading-title-sm);
+    text-box: trim-both cap alphabetic;
+  }
+</style>

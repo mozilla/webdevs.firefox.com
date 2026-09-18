@@ -2,8 +2,10 @@
 import type { GetStaticPaths } from 'astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 
-import SiteLayout from '~/layouts/SiteLayout.astro';
+import ArticleLayout from '~/layouts/ArticleLayout.astro';
+import ArticleHero from '~/components/ArticleHero';
 import { releaseNote } from './_release-note';
+import Prose from '~/components/Prose';
 
 /**
  * One page per release note, at `/release-notes/[year]/[version]/`.
@@ -21,13 +23,30 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title } = releaseNote(entry);
-const { Content } = await render(entry);
+const { title, releaseDate } = releaseNote(entry);
+const { Content, headings } = await render(entry);
+
+/** The h2s are the page's sections, and the numbering matches prose.css. */
+const sections = headings.filter(({ depth }) => depth === 2);
+
+const formattedDate = releaseDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
 ---
 
-<SiteLayout title={title}>
-  <article class="wrapper">
-    <h1>{title}</h1>
-    <Content />
-  </article>
-</SiteLayout>
+{/*
+  Release notes always contain code, so preloading is worth it.
+*/}
+<ArticleLayout title={title} sections={sections} preloadCodeFont>
+  <ArticleHero slot="hero" tag="Release">
+    {title}
+    <time slot="byline" datetime={releaseDate.toISOString().slice(0, 10)}>
+      {formattedDate}
+    </time>
+  </ArticleHero>
+
+  <Prose {Content} />
+</ArticleLayout>

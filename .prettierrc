@@ -7,6 +7,12 @@
       "options": {
         "parser": "astro"
       }
+    },
+    {
+      "files": "src/pages/_test/code.mdx",
+      "options": {
+        "embeddedLanguageFormatting": "off"
+      }
     }
   ]
 }

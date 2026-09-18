@@ -84,6 +84,15 @@ export default defineConfig([
     extends: [tseslint.configs.disableTypeChecked],
   },
 
+  // `node:test`'s `describe` and `it` return promises that the runner awaits
+  // itself, so every call in a test file would otherwise read as floating.
+  {
+    files: ['**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-floating-promises': 'off',
+    },
+  },
+
   {
     files: ['**/*.md'],
     plugins: {

@@ -20,16 +20,31 @@
   /* Color — fixed across modes */
   --color-purple-fixed: #7543e3;
   --color-white-fixed: #fff;
+  --color-black-fixed: #15141a;
 
-  /* Colour — mode dependent */
+  /* Color — mode dependent */
   --color-background-main: light-dark(#fff, #070414);
+  /* Figma also has a "Background Code" variable, but it carries the same pair
+     of values, so code blocks use this one rather than a second token that
+     would have to be kept in step. Split them again only if the design gives
+     them different values. */
   --color-background-spot: light-dark(#f1e7f8, #210340);
+  --color-background-note: light-dark(#fcf5f0, #010737);
   --color-heading: light-dark(#15141a, #fff);
   --color-text: light-dark(#42414d, #e4d7fc);
   --color-disabled-text: light-dark(#8c8b92, #575661);
   --color-border: light-dark(#e4d7fc, #3a0f6e);
   --color-purple: light-dark(#7543e3, #ad8df0);
+  --color-link-purple: light-dark(#6132bc, #ad8df0);
   --color-midnight-purple: light-dark(#210340, #3a0f6e);
+
+  /* Syntax highlighting */
+  --color-code-text: light-dark(#15141a, #fff);
+  --color-code-yellow: light-dark(#7f5a00, #ffd85f);
+  --color-code-orange: light-dark(#ae4a01, #ff9159);
+  --color-code-red: light-dark(#c02e2b, #fb4640);
+  --color-code-purple: light-dark(#5c3ab0, #9f87f8);
+  --color-code-green: light-dark(#1f6807, #4ccb27);
 
   /* Spacing scale */
   --space-0: 0;
@@ -38,9 +53,19 @@
   --space-16: 1rem;
   --space-20: 1.25rem;
   --space-24: 1.5rem;
+  --space-30: 1.875rem;
   --space-32: 2rem;
   --space-40: 2.5rem;
+  --space-45: 2.8125rem;
   --space-80: 5rem;
+
+  /* Off the scale above, and deliberately so: Figma has no spacing variable
+     for 30, but the editorial designs use it everywhere — between list items,
+     inside the Note panel, around a blockquote, under the hero headline. At
+     that many sites a name beats repeating the literal and its explanation,
+     which is a different case from a one-off positional value like the 20 in
+     the header, which stays a literal. */
+  --space-30: 1.875rem;
 
   /* Radii */
   --radius-pill: 12.5rem;
@@ -49,12 +74,25 @@
      which defines --font-mozilla-text and --font-mozilla-headline. */
 
   /* Type scale: each --text-* pairs with the --leading-* of its group. Figma
-     gives every size its own leading variable, but within the body and button
-     groups they all carry the same value, so there is one token per group. */
+     gives every size its own leading variable, but within the button group
+     they all carry the same value, so there is one token per group.
+
+     `body-main` and `body-sm` are both 16px and differ only in leading —
+     1.85 for running prose, 1.4 for the tighter contexts (table cells, nav)
+     that --leading-body covers. */
+  /* title-lg is Mozilla Headline's Condensed SemiBold; Figma's -0.5 at 64px
+     is -0.0078em. */
+  --text-title-lg: 4rem;
+  --leading-title-lg: 0.9;
+  --tracking-title-lg: -0.0078em;
   --text-title-sm: 2rem;
   --leading-title-sm: 1;
   --text-title-xs: 1.5rem;
   --leading-title-xs: 1.1;
+  --text-title-xxs: 1rem;
+  --leading-title-xxs: 1.1;
+  --text-body-main: 1rem;
+  --leading-body-main: 1.85;
   --text-body-sm: 1rem;
   --text-body-xs: 0.875rem;
   --leading-body: 1.4;

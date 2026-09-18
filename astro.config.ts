@@ -5,6 +5,11 @@ import mdx from '@astrojs/mdx';
 import preact from '@astrojs/preact';
 
 import { writeCssModuleTypes } from './lib/css-module-types.ts';
+import { codeWidths } from './lib/markdown/code-widths/plugin.ts';
+import { transformerIndentWrap } from './lib/markdown/code-widths/indent-wrap.ts';
+import { definitionGroups } from './lib/markdown/definition-groups.ts';
+import { looseBlocks } from './lib/markdown/loose-blocks.ts';
+import { tableScroll } from './lib/markdown/table-scroll.ts';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,7 +19,15 @@ export default defineConfig({
     format: 'preserve',
   },
   markdown: {
-    processor: satteri({ features: { definitionList: true } }),
+    /* Responsive code block widths */
+    shikiConfig: {
+      transformers: [transformerIndentWrap()],
+    },
+    processor: satteri({
+      features: { definitionList: true },
+      mdastPlugins: [looseBlocks, codeWidths],
+      hastPlugins: [definitionGroups, tableScroll],
+    }),
   },
   vite: {
     resolve: {
@@ -63,6 +76,14 @@ export default defineConfig({
       cssVariable: '--font-mozilla-headline',
       weights: ['200 700'],
       styles: ['normal'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Inconsolata',
+      cssVariable: '--font-inconsolata',
+      weights: ['200 900'],
+      styles: ['normal'],
+      fallbacks: ['monospace'],
     },
   ],
 });

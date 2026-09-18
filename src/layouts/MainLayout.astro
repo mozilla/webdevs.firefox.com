@@ -7,9 +7,14 @@ interface Props {
   title: string;
   description?: string | undefined;
   image?: string | undefined;
+  /**
+   * Preloads the code face.
+   * Set to `true` on pages that are highly likely to display code above the fold.
+   */
+  preloadCodeFont?: boolean | undefined;
 }
 
-const { title, description, image } = Astro.props;
+const { title, description, image, preloadCodeFont = false } = Astro.props;
 ---
 
 <html lang="en">
@@ -17,6 +22,7 @@ const { title, description, image } = Astro.props;
     <Head title={title} description={description} image={image} />
     <Font cssVariable="--font-mozilla-text" preload={[{ style: 'normal' }]} />
     <Font cssVariable="--font-mozilla-headline" preload />
+    <Font cssVariable="--font-inconsolata" preload={preloadCodeFont} />
   </head>
   <body>
     <slot />

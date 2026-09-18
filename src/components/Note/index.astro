@@ -1,22 +1,62 @@
 ---
+/**
+ * The "Note" component from Figma (node `42:2131`): a rounded panel on the
+ * note background, with a heading above the body.
+ *
+ * Figma has a second variant (`42:2136`) with an information icon above the
+ * heading, not built for now. The two "Details" frames beside them
+ * (`42:2143`, `42:2151`) are a collapsible disclosure, not this component.
+ *
+ * Carries `prose-end` so the prose stylesheet's block spacing and element
+ * rules stop at the panel's boundary — the panel sets its own. The body then
+ * opens a fresh `.prose` scope, because the slot takes authored markdown and
+ * wants those element rules back; starting again rather than never stopping
+ * means the panel's own padding and heading are styled by this component,
+ * and only the authored content inside is prose.
+ */
+interface Props {
+  /** Heading shown above the body. GitHub alerts map to these. */
+  type?: 'note' | 'warning' | 'info' | undefined;
+}
 
+const { type = 'note' } = Astro.props;
+
+const headings = {
+  note: 'Note',
+  warning: 'Warning',
+  info: 'Info',
+} as const;
 ---
 
-<aside class="note">
-  <p class="label">TODO Note:</p>
-  <slot />
-</aside>
+<div role="note" class="note prose-end">
+  <p class="heading">{headings[type]}</p>
+  <div class="body prose">
+    <slot />
+  </div>
+</div>
 
 <style>
   .note {
-    display: grid;
-    gap: var(--space-8);
-    padding: var(--space-16);
-    border-inline-start: 0.25rem solid var(--color-purple-fixed);
-    background-color: var(--color-background-spot);
+    padding: var(--space-30);
+    border-radius: 0.75rem;
+    background-color: var(--color-background-note);
+    margin-block: var(--space-40);
   }
 
-  .label {
+  .heading {
+    margin-block-end: var(--space-30);
+    color: var(--color-heading);
+    font-family: var(--font-mozilla-headline);
+    font-size: var(--text-title-xs);
     font-weight: 600;
+    line-height: var(--leading-title-xs);
+    text-box: trim-both cap alphabetic;
+  }
+
+  .body {
+    /* Replace with margin-trim later */
+    & > :global(:last-child) {
+      margin-block-end: 0;
+    }
   }
 </style>

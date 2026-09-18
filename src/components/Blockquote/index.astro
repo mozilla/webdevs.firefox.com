@@ -1,0 +1,117 @@
+---
+/**
+ * A quotation — Figma's "Blockquote" (node `42:2062`): the quote set in the
+ * heading family with a large purple quote mark hanging beside its first line,
+ * and an optional attribution beneath, the name in semibold over the role.
+ *
+ * Mapped onto markdown's `>` syntax, so an author writes a plain blockquote
+ * and gets this. Every page that renders MDX passes it through the `components`
+ * prop — see `prose-components.ts`, which is the one place that mapping is
+ * written. That is what lets the styles live here rather than in `prose.css`:
+ * the component is not an alternative to authored markup, it *is* what
+ * authored markup renders as, so there is no second code path to keep in step.
+ *
+ * The quote is the default slot. An attribution is added with the `name` and
+ * `role` slots, which markdown cannot express and so are only reachable from
+ * an explicit call:
+ *
+ * ```astro
+ * <Blockquote>
+ *   The quotation.
+ *
+ *   <Fragment slot="name">Name Lastname</Fragment>
+ *   <Fragment slot="role">Position or Title</Fragment>
+ * </Blockquote>
+ * ```
+ *
+ * Don't wrap the quote in an explicit `<p>` when calling it from MDX: MDX adds
+ * its own, and the pair nest into invalid `<p><p>`. Leave the text bare.
+ */
+
+/** Rendered only when a name is given; a footer holding just a role reads as
+    a stray line rather than an attribution. */
+const hasAttribution = Astro.slots.has('name');
+---
+
+<blockquote>
+  <slot />
+  {hasAttribution && (
+    <footer>
+      <slot name="name" />
+      {Astro.slots.has('role') && (
+        <cite>
+          <slot name="role" />
+        </cite>
+      )}
+    </footer>
+  )}
+</blockquote>
+
+<style>
+  /*
+   * The descendant selectors below are `:global()` because the content comes
+   * from markdown: Astro puts its scope hash on this component's root element
+   * only, so a bare `& p` would compile to `p[data-astro-cid-…]` and match
+   * nothing MDX generated. Scoping the root and leaving the descendants global
+   * keeps the rules contained to a blockquote without depending on a hash the
+   * children never get.
+   */
+  blockquote {
+    position: relative;
+    /* Blocks inside the quote are part of one thought, so they sit at the
+       tighter 30 rather than the spacing that separates prose blocks. */
+    padding-block: var(--space-30);
+    /* Room for the quote mark, which hangs beside the first line. In Figma
+       the mark sits 38 to the left of a quote that is flush with the text
+       column; indenting instead keeps it inside the column on narrow
+       viewports, where a negative offset would be clipped. */
+    padding-inline-start: 2.375rem;
+
+    /* Taken out of flow, so it neither shifts the quote nor adds a line. */
+    &::before {
+      content: '\201C';
+      position: absolute;
+      /* Level with the quote's first line, so it matches the padding above. */
+      inset-block-start: var(--space-30);
+      inset-inline-start: 0;
+      color: var(--color-purple);
+      font-family: var(--font-mozilla-headline);
+      font-size: var(--text-title-lg);
+      font-weight: 600;
+      font-stretch: condensed;
+      line-height: var(--leading-title-lg);
+      letter-spacing: var(--tracking-title-lg);
+    }
+
+    & :global(p) {
+      color: var(--color-heading);
+      font-family: var(--font-mozilla-headline);
+      font-size: var(--text-title-xs);
+      font-weight: 600;
+      line-height: 1.25;
+    }
+
+    /* A quote can hold several paragraphs; they group tighter than the prose
+       blocks around the quote do. `prose.css` sets this for a blockquote's
+       children, but it cannot see inside this component's subtree. */
+    & :global(> :not(:first-child)) {
+      margin-block-start: var(--space-30);
+    }
+  }
+
+  /* Attribution: name in semibold, role beneath it in body color. */
+  footer {
+    color: var(--color-heading);
+    font-size: var(--text-body-xs);
+    font-weight: 600;
+    line-height: var(--leading-body);
+
+    & cite {
+      display: block;
+      margin-block-start: var(--space-8);
+      color: var(--color-text);
+      font-weight: 400;
+      font-style: normal;
+    }
+  }
+</style>

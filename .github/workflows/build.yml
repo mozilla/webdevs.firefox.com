@@ -20,8 +20,16 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm run format:check
+
       # Build first: it generates the CSS Module declarations that ESLint's
       # type-aware rules and `astro check` both read.
-      - run: pnpm run build
+      #
+      # With the test pages, as `pnpm check` does: a test page is sometimes the
+      # only consumer of a piece of `lib/`, and `astro check` only type-checks
+      # what the build pulled in.
+      - run: INCLUDE_TEST_PAGES=1 pnpm run build
 
       - run: pnpm run lint
+
+      - run: pnpm run test

@@ -1,0 +1,36 @@
+---
+import ArticleLayout from '~/layouts/ArticleLayout.astro';
+import ArticleHero from '~/components/ArticleHero';
+import { testPagePaths } from '~/pages/_test/_test-pages';
+import Prose from '~/components/Prose';
+import { Content, getHeadings, frontmatter } from '~/pages/_test/prose.mdx';
+
+/**
+ * Prose specimen, at `/test/prose/` — every construct `prose.css` styles on
+ * one page, so a change to that stylesheet can be checked against all of them
+ * at once.
+ *
+ * The content is MDX rather than markup in this file because prose is what an
+ * author writes as markdown: routing it through the real pipeline, `satteri`
+ * and all, tests what their markdown actually produces. Test pages for
+ * anything that isn't authored content write their markup here instead — see
+ * `_test-pages.ts` for why they are all dynamic routes.
+ */
+export const getStaticPaths = testPagePaths;
+
+/* A direct MDX import types `getHeadings` but leaves `frontmatter` as `any`,
+   so the shape this page reads off it is stated at the boundary. */
+const { title } = frontmatter as { title: string };
+
+/** The h2s are the page's sections, and the numbering matches prose.css. */
+const sections = getHeadings().filter(({ depth }) => depth === 2);
+---
+
+<ArticleLayout title={title} sections={sections}>
+  <ArticleHero slot="hero" tag="Test">
+    {title}
+    <Fragment slot="byline">Specimen page</Fragment>
+  </ArticleHero>
+
+  <Prose {Content} />
+</ArticleLayout>
