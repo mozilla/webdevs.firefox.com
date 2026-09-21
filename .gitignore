@@ -26,3 +26,7 @@ pnpm-debug.log*
 
 .playwright-mcp/
 .vscode
+
+# visual regression runs — builds, screenshots, and the local stand-in for
+# the baseline object store. Only tests/visual/baseline.txt is committed.
+.vrt/

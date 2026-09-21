@@ -44,6 +44,18 @@ export default defineConfig({
     }),
   },
   vite: {
+    server: {
+      watch: {
+        /*
+         * A visual regression run writes continuously into `.vrt/` — the
+         * built fixture site, every screenshot, and Playwright's trace
+         * artifacts, which are thousands of small files. The dev server
+         * has no reason to watch any of it, and left alone it logs a
+         * `[watch]` line per file while a run is in progress.
+         */
+        ignored: ['**/.vrt/**'],
+      },
+    },
     build: {
       /*
        * The oldest browsers Lightning CSS, which minifies the built CSS, may

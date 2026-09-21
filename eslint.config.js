@@ -11,7 +11,9 @@ const codeFiles = ['**/*.{js,mjs,cjs,ts,mts,cts,tsx,astro}'];
 export default defineConfig([
   {
     // `CLAUDE.md` is a symlink to `AGENTS.md`; lint the file itself, once.
-    ignores: ['dist/', '.astro/', 'CLAUDE.md'],
+    // `.vrt/` holds the visual regression build and its screenshots — the
+    // same generated output as `dist/`, plus Playwright's artifacts.
+    ignores: ['dist/', '.astro/', '.vrt/', 'CLAUDE.md'],
   },
 
   {

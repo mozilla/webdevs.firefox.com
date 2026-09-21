@@ -1,0 +1,23 @@
+---
+import MainLayout from '~/layouts/MainLayout.astro';
+import Header from '~/components/Header';
+import { testPagePaths } from '~/pages/_test/_test-pages';
+
+/**
+ * Header specimen, at `/test/header/` — the plain header, on its own.
+ *
+ * `MainLayout` rather than `SiteLayout`, because the header is the subject
+ * and the site chrome would render a second copy of it.
+ *
+ * The overlay variant is a separate page, `/test/header-overlay/`, because
+ * it is only meaningful over the gradient it was drawn to sit on. Faking
+ * that gradient here would mean the baseline recorded the fake: a change
+ * to the real hero would leave this page passing, which is worse than not
+ * testing it.
+ */
+export const getStaticPaths = testPagePaths;
+---
+
+<MainLayout title="Header specimen">
+  <Header />
+</MainLayout>

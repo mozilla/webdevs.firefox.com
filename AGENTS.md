@@ -5,13 +5,14 @@ Astro static site for Firefox's web developer audience. Built from the
 
 ## Commands
 
-| Command       | Purpose                                                |
-| ------------- | ------------------------------------------------------ |
-| `pnpm dev`    | Dev server                                             |
-| `pnpm check`  | Prettier + build + ESLint + tests (run before commits) |
-| `pnpm build`  | Production build, then `astro check` and `tsc`         |
-| `pnpm format` | Write Prettier formatting                              |
-| `pnpm test`   | Unit tests for `lib/`, on Node's own runner            |
+| Command       | Purpose                                                     |
+| ------------- | ----------------------------------------------------------- |
+| `pnpm dev`    | Dev server                                                  |
+| `pnpm check`  | Prettier + build + ESLint + tests (run before commits)      |
+| `pnpm build`  | Production build, then `astro check` and `tsc`              |
+| `pnpm format` | Write Prettier formatting                                   |
+| `pnpm test`   | Unit tests for `lib/` and `tests/visual/`, on Node's runner |
+| `pnpm vrt`    | Visual regression run — see "Visual regression testing"     |
 
 The build runs before both `astro check` and ESLint, because it generates the
 CSS Module declarations that their type-aware rules read — see
@@ -447,12 +448,19 @@ Specimen pages for checking styles against the design live under
 `src/pages/test/`, one directory per page, and are absent from the production
 build rather than present and hidden.
 
+They have a second audience: the visual regression suite screenshots them,
+so several are also a baseline. See "Visual regression testing" below —
+notably that a page's layout should be chosen for what the component needs,
+since `SiteLayout` would render a second copy of a header or footer under
+test.
+
 | Command                           | `/test/*` |
 | --------------------------------- | --------- |
 | `pnpm dev`                        | included  |
 | `pnpm build`                      | omitted   |
 | `INCLUDE_TEST_PAGES=1 pnpm build` | included  |
 | `pnpm check`                      | included  |
+| `pnpm vrt`                        | included  |
 
 `pnpm check` sets `INCLUDE_TEST_PAGES=1` for its build step deliberately.
 A test page is sometimes the only consumer of a piece of `lib/`, and
@@ -505,11 +513,75 @@ Prettier also rewrites a block `{/* … */}` comment between markdown blocks
 into `{/_ … _/}`, which breaks the build. Keep MDX comments on one line inside
 JSX, or write the explanation as prose on the page.
 
+## Visual regression testing
+
+The specimen pages under `src/pages/test/` are rendered in real browsers
+and compared against a stored baseline. `tests/visual/README.md` is the
+guide; what follows is only what binds from outside that directory.
+
+**It is local-only.** There is no bucket yet, so the baseline store is
+`.vrt/store/`, gitignored — baselines don't travel between machines and
+there is no CI job. Phases 3–7 of
+`plans/visual-regression-testing-plan.md` are unbuilt, and the README's
+"Not yet built" section says what that leaves.
+
+**Everything runs in Docker**, so the pixels don't depend on whose machine
+produced them. `pnpm vrt` builds the site, hydrates the baseline and runs
+the matrix; `pnpm vrt:accept` promotes a run and rewrites the hash file,
+leaving it unstaged for you to review.
+
+**The browsers are deliberately not pinned.** All five are fetched at
+image build time from the vendors' current releases, so `stable` tracks
+what ships today and `prerelease` what is in beta today — a rendering
+change in a browser release is a signal worth having, not noise to
+engineer away. The cost is that a failure has two possible causes, so
+every run prints the versions it drove and each baseline folder carries a
+`versions.json`. Check those before assuming a diff is yours.
+
+**There is one set of specimen pages, not two.** `src/pages/test/` is the
+only home for pages that exist to be looked at — a page a human opens to
+check a component against the design and a page a browser screenshots want
+the same thing, so there is one copy. `tests/visual/targets.ts` is a list
+of routes and how to shoot them, and holds no markup. A separate set of
+VRT-only fixtures would drift from the specimens and would mean a state
+added to one went unscreenshotted by the other.
+
+The practical consequence when adding a specimen page: **it may be
+screenshotted**, so pick its layout for what the component needs rather
+than out of habit. `/test/header/` and `/test/footer/` use `MainLayout`,
+because `SiteLayout` would render a second copy of the very thing they
+exist to show.
+
+Three things bind from outside `tests/visual/`:
+
+- **There is no VRT Astro config and no VRT build.** `pnpm vrt` runs
+  `INCLUDE_TEST_PAGES=1 astro build` — the same build `pnpm check` does —
+  and screenshots `dist/`. So a screenshot is of the site as built, not of
+  a VRT-only variant of it. Animation overrides, scrollbar suppression and
+  an eager-images script were each tried and each removed once measured;
+  the README's "What is not stabilised" records what they did and why they
+  were wrong. Don't add one back without emptying it out first and showing
+  the failure it prevents.
+- **`.vrt/` is ignored by git, ESLint, Prettier and the dev server's
+  watcher.** The last one matters in practice: a run writes thousands of
+  trace artifacts, and without it `pnpm dev` logs a `[watch]` line for each.
+
+**Screenshots are re-compressed with `sharp` before storage** — losslessly,
+same pixels, about a fifth of the size. They stay PNG deliberately: a
+smaller format like JPEG XL would save a little more, but Playwright picks
+its image comparator from the file extension and implements only PNG and
+JPEG, so anything else means decoding both sides by hand and giving up the
+report's Diff and Slider views.
+
 ## Not yet built
 
 Link destinations in the header and footer are inferred from labels, since
 the design only specifies text. They need checking against what the team
 actually intends.
+
+The visual regression suite has no object store and no CI, so it only runs
+locally — see the section above, and `tests/visual/README.md` for what
+remains.
 
 Only desktop frames (1440px) exist in Figma, so responsive behavior below
 that is an interpretation rather than a spec. The code block's inline padding

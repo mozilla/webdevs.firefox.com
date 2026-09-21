@@ -1,0 +1,22 @@
+---
+import MainLayout from '~/layouts/MainLayout.astro';
+import Footer from '~/components/Footer';
+import { testPagePaths } from '~/pages/_test/_test-pages';
+
+/**
+ * Footer specimen, at `/test/footer/` — the footer on its own.
+ *
+ * `MainLayout` rather than `SiteLayout`, so the footer appears once and at
+ * the top of the page, where it can be read without scrolling past a page's
+ * worth of content.
+ *
+ * It pins `color-scheme: dark` on itself, so it should look identical in
+ * both schemes. The visual regression suite captures this page in each, and
+ * a diff between the two is the regression.
+ */
+export const getStaticPaths = testPagePaths;
+---
+
+<MainLayout title="Footer specimen">
+  <Footer />
+</MainLayout>
