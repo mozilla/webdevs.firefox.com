@@ -131,18 +131,26 @@
       text-decoration-thickness: 0.125rem;
     }
 
-    /* External link markers */
+    /*
+     * External link markers
+     *
+     * Deliberately using an inline box here, to prevent it wrapping onto a new line, or allowing punctuation afterwards
+     * to wrap onto its own line.
+     */
     &[href^='http']:not([href^='https://webdevs.firefox.com'])::after {
       content: '';
-      display: inline-block;
-      width: 0.75rem;
-      height: 1em;
-      margin-inline-start: 0.125rem;
-      vertical-align: middle;
+      /* 0.125 gap + 0.75 icon */
+      padding-inline-start: 0.875rem;
       background-color: var(--color-link-purple);
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 16'%3E%3Cpath d='M2.25 3c-.83 0-1.5.67-1.5 1.5v7.25c0 .83.67 1.5 1.5 1.5H9.5c.83 0 1.5-.67 1.5-1.5v-3H9.75v3q-.02.23-.25.25H2.25a.25.25 0 0 1-.25-.25V4.5c0-.14.11-.25.25-.25h3V3z'/%3E%3Cpath d='m10.15 7.15-1.2-1.2-2.5 2.5-.9-.9 2.5-2.5-1.2-1.2A.5.5 0 0 1 7.21 3h3.29c.28 0 .5.22.5.5v3.3a.5.5 0 0 1-.85.35'/%3E%3C/svg%3E");
       mask-repeat: no-repeat;
-      mask-position: left center;
+      /*
+       * Centered in the pseudo-element's content box, which is the font's
+       * ascent plus descent rather than the 1em box an inline-block would
+       * have had, so the 0.0625 puts the marker back where vertical-align:
+       * middle held it. Measured against Mozilla Text, not derived.
+       */
+      mask-position: right calc(50% + 0.0625rem);
       mask-size: 0.75rem 1rem;
     }
   }
