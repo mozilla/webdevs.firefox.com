@@ -5,9 +5,11 @@ import path from 'node:path';
 /**
  * Sparse-checks-out the parts of `mdn/content` the release-note import reads.
  *
- * A shallow, sparse clone is a few seconds and ~60 MB of git objects. The
- * checkout is cached between runs and refreshed only under `--fresh`, since
- * re-resolving 17,500 redirects against an unchanged tree is pure latency.
+ * A shallow, sparse clone is a few seconds and ~60 MB of git objects, so an
+ * import refetches by default and the notes reflect upstream as it is now.
+ * `--use-cache` reuses the last run's checkout, which is worth having while
+ * iterating on the conversion: re-resolving 17,500 redirects against an
+ * unchanged tree is pure latency.
  */
 
 const CONTENT_REPO = 'https://github.com/mdn/content.git';
@@ -32,7 +34,7 @@ const SPARSE_PATHS = ['files/en-us'];
 export interface Checkout {
   /** Absolute path to `files/en-us` within the checkout. */
   root: string;
-  /** The commit the content came from, recorded in the generated output. */
+  /** The commit the content came from, reported at the end of a run. */
   sha: string;
 }
 
@@ -42,9 +44,10 @@ function git(cwd: string, ...arguments_: string[]): string {
 
 export function fetchContent(
   cacheDirectory: string,
-  isFresh: boolean,
+  shouldUseCache: boolean,
 ): Checkout {
-  const isCached = existsSync(path.join(cacheDirectory, '.git')) && !isFresh;
+  const isCached =
+    shouldUseCache && existsSync(path.join(cacheDirectory, '.git'));
 
   if (!isCached) {
     mkdirSync(cacheDirectory, { recursive: true });

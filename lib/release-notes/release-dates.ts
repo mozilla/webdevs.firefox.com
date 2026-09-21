@@ -15,8 +15,8 @@ import path from 'node:path';
  * contributor's machine to supply 99 date strings. The file is 41 KB, and
  * fetching it from the repo mirrors how the content itself is fetched.
  *
- * Cached on disk beside the content checkout, so repeated runs are offline.
- * `--fresh` re-fetches.
+ * Refetched on every run, alongside the content itself. Cached on disk beside
+ * the content checkout, so `--use-cache` makes a repeated run offline.
  */
 
 const BCD_URL =
@@ -39,11 +39,11 @@ export interface Release {
 
 async function loadFirefoxData(
   cacheDirectory: string,
-  isFresh: boolean,
+  shouldUseCache: boolean,
 ): Promise<BcdFirefox> {
   const cacheFile = path.join(cacheDirectory, 'bcd-firefox.json');
 
-  if (!isFresh && existsSync(cacheFile)) {
+  if (shouldUseCache && existsSync(cacheFile)) {
     return JSON.parse(readFileSync(cacheFile, 'utf8')) as BcdFirefox;
   }
 
@@ -67,9 +67,9 @@ async function loadFirefoxData(
 export async function releasesFrom(
   minVersion: number,
   cacheDirectory: string,
-  isFresh: boolean,
+  shouldUseCache: boolean,
 ): Promise<Release[]> {
-  const data = await loadFirefoxData(cacheDirectory, isFresh);
+  const data = await loadFirefoxData(cacheDirectory, shouldUseCache);
   const releases = data.browsers?.firefox?.releases;
   if (!releases) {
     throw new Error('no browsers.firefox.releases in BCD data');
