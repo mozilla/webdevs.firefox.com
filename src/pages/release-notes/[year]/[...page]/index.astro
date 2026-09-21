@@ -4,16 +4,22 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 
 import ArticleLayout from '~/layouts/ArticleLayout.astro';
 import ArticleHero from '~/components/ArticleHero';
-import { releaseNote } from './_release-note';
+import { releaseNote } from '../_release-note';
 
 /**
- * One page per release note, at `/release-notes/[year]/[version]/`.
+ * One page per release note, at `/release-notes/[year]/[version]/`, and one
+ * per sub-page below it at `/release-notes/[year]/[version]/[sub-page]/`.
+ *
+ * A rest parameter rather than a `[version]` segment plus a nested route,
+ * because the two differ only in depth: both render the same entry the same
+ * way, and splitting them would mean two copies of this component.
  */
 export const getStaticPaths = (async () => {
   const notes = await getCollection('releaseNotes');
   return notes.map((entry) => {
-    const { year, version } = releaseNote(entry);
-    return { params: { year, version }, props: { entry } };
+    const { year, version, subPage } = releaseNote(entry);
+    const page = subPage === undefined ? version : `${version}/${subPage}`;
+    return { params: { year, page }, props: { entry } };
   });
 }) satisfies GetStaticPaths;
 

@@ -1,4 +1,4 @@
-import { expandMacro, type MacroContext } from './macros.ts';
+import { expandMacro, expandMacroText, type MacroContext } from './macros.ts';
 import { MDN_BASE, type Mdn } from './mdn.ts';
 import { parseMacros } from './parse.ts';
 
@@ -47,7 +47,7 @@ const MDN_DEFINITION = /^(\s*)-\s*:\s+(.*)$/;
 const DOC_LINK = /\]\((\/en-US\/docs\/[^)\s]+)\)/g;
 /** A release-note doc path, capturing version and anchor. */
 const RELEASE_NOTE_PATH =
-  /^\/en-US\/docs\/Mozilla\/Firefox\/Releases\/(\d+)(#.*)?$/i;
+  /^\/en-US\/docs\/Mozilla\/Firefox\/Releases\/(\d+(?:\.\d+)?)(?:\/([^#]+))?(#.*)?$/i;
 
 export function convertBody(body: string, options: ConvertOptions): Converted {
   const { mdn, file } = options;
@@ -65,11 +65,12 @@ export function convertBody(body: string, options: ConvertOptions): Converted {
     const resolved = mdn.resolve(documentUrl);
     const release = RELEASE_NOTE_PATH.exec(resolved);
     if (release !== null) {
-      const [, version = '', anchor = ''] = release;
+      const [, version = '', subPage, anchor = ''] = release;
       const year = options.years.get(version);
       // Out-of-scope versions stay on MDN — there is no local page to link to.
       if (year !== undefined) {
-        return `/release-notes/${String(year)}/${version}/${anchor}`;
+        const sub = subPage === undefined ? '' : `${subPage.toLowerCase()}/`;
+        return `/release-notes/${String(year)}/${version}/${sub}${anchor}`;
       }
     }
     return MDN_BASE + resolved;
@@ -112,14 +113,15 @@ export function convertBody(body: string, options: ConvertOptions): Converted {
     if (alert !== null) {
       const indent = alert[1] ?? '';
       const kind = (alert[2] ?? '').toUpperCase();
-      if (kind !== 'NOTE') {
+      if (kind !== 'NOTE' && kind !== 'WARNING') {
         throw new ConvertError(
           file,
           lineNumber,
-          `unsupported alert type [!${kind}] — only [!NOTE] has a component`,
+          `unsupported alert type [!${kind}] — only [!NOTE] and [!WARNING] have a component`,
         );
       }
       hasNote = true;
+      const open = kind === 'WARNING' ? '<Note type="warning">' : '<Note>';
 
       // The alert body is the blockquote lines that follow, at the same
       // indentation. Consume them here and advance the outer index past them.
@@ -132,7 +134,7 @@ export function convertBody(body: string, options: ConvertOptions): Converted {
       }
       index = cursor - 1;
 
-      out.push(`${indent}<Note>`);
+      out.push(`${indent}${open}`);
       for (const [offset, text] of content.entries()) {
         const converted = convertInline(
           text,
@@ -140,9 +142,7 @@ export function convertBody(body: string, options: ConvertOptions): Converted {
           file,
           lineNumber + offset + 1,
         );
-        out.push(
-          text === '' ? '' : `${indent}  ${escapeBareAngles(converted)}`,
-        );
+        out.push(text === '' ? '' : `${indent}  ${converted}`);
       }
       out.push(`${indent}</Note>`);
       continue;
@@ -192,9 +192,18 @@ export function convertBody(body: string, options: ConvertOptions): Converted {
     // HTML comments: MDX reads `<!--` as a JSX tag and fails. Converting
     // rather than stripping keeps re-run diffs meaningful when an author
     // uncomments a heading upstream.
-    line = toMdxComment(line, file, lineNumber);
-
-    out.push(escapeBareAngles(convertInline(line, context, file, lineNumber)));
+    //
+    // After the inline pass, not before it: the `{` and `}` this writes are
+    // MDX syntax, and `escapeBraces` cannot tell them from a brace in the
+    // prose it is there to escape. `escapeBareAngles` leaves the `<!--`
+    // alone either way, since a `<` followed by `!` can open a tag.
+    out.push(
+      toMdxComment(
+        convertInline(line, context, file, lineNumber),
+        file,
+        lineNumber,
+      ),
+    );
   }
 
   return { body: out.join('\n'), hasNote };
@@ -231,32 +240,108 @@ function toMdxComment(source: string, file: string, line: number): string {
  * Code spans are skipped: inside backticks a `<` is already literal, and
  * escaping there would put the backslash on the page.
  */
-function escapeBareAngles(line: string): string {
-  return line
-    .split(/(`+[^`]*`+)/)
-    .map((part, index) =>
+/**
+ * Applies `transform` to a line's prose, leaving its code spans alone.
+ *
+ * Called again after macro expansion as well as before it, because a macro
+ * emits backticks of its own: `WebExtAPIRef` code-wraps its text by default,
+ * so `windows.update(windowId, { focused: true })` is a code span that did
+ * not exist when the line was first split. Escaping its braces would put the
+ * backslashes on the page, since a backslash inside a code span is literal.
+ */
+function outsideCodeSpans(
+  line: string,
+  transform: (prose: string) => string,
+): string {
+  return (
+    line
+      .split(/(`+[^`]*`+)/)
       // Odd indices are the captured code spans.
-      index % 2 === 1
-        ? part
-        : part.replaceAll(/<(?![A-Za-z/!])/g, String.raw`\<`),
-    )
-    .join('');
+      .map((part, index) => (index % 2 === 1 ? part : transform(part)))
+      .join('')
+  );
 }
 
-/** Expands macros and rewrites doc links within one line. */
+function escapeBareAngles(line: string): string {
+  return outsideCodeSpans(line, (prose) =>
+    prose.replaceAll(/<(?![A-Za-z/!])/g, String.raw`\<`),
+  );
+}
+
+/**
+ * Expands macros and rewrites doc links within one line.
+ *
+ * Everything here is applied to the line's prose only — code spans are split
+ * out first and passed through untouched. Inside backticks the text is
+ * already literal, so a macro there is being *shown*, not called: expanding
+ * `` `{{cssxref("justify-content")}}: space-evenly` `` would nest a
+ * markdown link inside a code span and render as its own source.
+ */
 function convertInline(
   line: string,
   context: MacroContext,
   file: string,
   lineNumber: number,
 ): string {
-  const expanded = expandMacros(line, context, file, lineNumber);
+  return (
+    line
+      .split(/(`+[^`]*`+)/)
+      // Odd indices are the captured code spans.
+      .map((part, index) =>
+        index % 2 === 1
+          ? expandMacros(part, context, file, lineNumber, true)
+          : convertProse(part, context, file, lineNumber),
+      )
+      .join('')
+  );
+}
+
+/** One line's worth of prose, with no code span in it. */
+function convertProse(
+  prose: string,
+  context: MacroContext,
+  file: string,
+  lineNumber: number,
+): string {
+  const expanded = expandMacros(prose, context, file, lineNumber);
 
   // Prose links to MDN. Macro output is already absolute, so this only sees
   // links that were authored as doc paths.
-  return expanded.replaceAll(DOC_LINK, (_, url: string) => {
+  const linked = expanded.replaceAll(DOC_LINK, (_, url: string) => {
     return `](${context.linkUrl(url)})`;
   });
+
+  return escapeBraces(escapeAutolinks(escapeBareAngles(linked)));
+}
+
+/**
+ * Rewrites a bare `<https://…>` autolink as an explicit markdown link.
+ *
+ * Markdown's autolink is valid MDX syntax in principle, but MDX reads the
+ * `<` as opening a JSX tag and fails on the `:` before it ever gets there —
+ * the error even suggests `[text](url)`, which is what this writes.
+ */
+function escapeAutolinks(line: string): string {
+  return outsideCodeSpans(line, (prose) =>
+    prose.replaceAll(
+      /<((?:https?|ftp|mailto):[^>\s]+)>/g,
+      (_, url: string) => `[${url}](${url})`,
+    ),
+  );
+}
+
+/**
+ * Backslash-escapes a brace, which MDX would otherwise read as opening an
+ * expression — `{key: value}` in prose is a JavaScript object to MDX, and
+ * `the { } button` an empty one.
+ *
+ * Macros are long gone by the time this runs, and code spans never reach it,
+ * so every brace left is literal text.
+ */
+function escapeBraces(line: string): string {
+  return outsideCodeSpans(line, (prose) =>
+    prose.replaceAll(/[{}]/g, (brace) => `\\${brace}`),
+  );
 }
 
 function expandMacros(
@@ -264,6 +349,8 @@ function expandMacros(
   context: MacroContext,
   file: string,
   lineNumber: number,
+  /** Whether `line` is a code span, so a macro expands to bare text. */
+  isCode = false,
 ): string {
   const macros = parseMacros(line);
   if (macros.length === 0) return line;
@@ -273,7 +360,9 @@ function expandMacros(
   for (const macro of macros.toReversed()) {
     let markdown: string;
     try {
-      markdown = expandMacro(macro, context).markdown;
+      markdown = isCode
+        ? expandMacroText(macro, context)
+        : expandMacro(macro, context).markdown;
     } catch (error) {
       throw new ConvertError(
         file,

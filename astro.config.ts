@@ -1,4 +1,8 @@
-import { defineConfig, fontProviders } from 'astro/config';
+import {
+  defineConfig,
+  fontProviders,
+  passthroughImageService,
+} from 'astro/config';
 
 import { satteri } from '@astrojs/markdown-satteri';
 import mdx from '@astrojs/mdx';
@@ -20,8 +24,13 @@ export default defineConfig({
   build: {
     format: 'preserve',
   },
+  image: {
+    /*
+     * Don't re-encode images. We're professionals. Honest.
+     */
+    service: passthroughImageService(),
+  },
   markdown: {
-    /* Responsive code block widths */
     shikiConfig: {
       /* Syntax colors from the design's Code * variables */
       theme: codeTheme,

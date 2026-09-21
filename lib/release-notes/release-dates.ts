@@ -77,7 +77,8 @@ export async function releasesFrom(
 
   const out: Release[] = [];
   for (const [version, info] of Object.entries(releases)) {
-    if (!/^\d+$/.test(version) || Number(version) < minVersion) continue;
+    if (!/^\d+(\.\d+)?$/.test(version) || Number(version) < minVersion)
+      continue;
     const date = info.release_date;
     if (date === undefined || date === '') {
       // BCD has a date for every version today. If that ever changes, the

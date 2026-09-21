@@ -107,7 +107,17 @@ export const proseComponents = () => ({
     }
 
     /* Appended, so the file's own line numbers survive for error messages
-       and no source map is needed to correct them. */
-    return `${code}\n\n${generated}\n`;
+       and no source map is needed to correct them.
+    
+       The comment between the two is load-bearing. A blank line does not
+       close a definition list — pandoc's syntax allows a loose list, so the
+       parser is still waiting for another `term` / `: definition` pair — and
+       a file whose last block is one swallows what follows as more list
+       content. The ESM then parses as an MDX expression instead, and
+       `export const components = { blockquote: … }` fails on the `:` at a
+       line number past the end of the file, which is a thoroughly
+       unhelpful place to be told about it. A comment is a block of its own,
+       so it terminates the list and leaves nothing on the page. */
+    return `${code}\n\n{/* prose-components */}\n\n${generated}\n`;
   },
 });

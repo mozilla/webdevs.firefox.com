@@ -271,7 +271,24 @@ const MACROS: Record<string, MacroFunction> = {
   },
 };
 
-export const MACRO_NAMES: ReadonlySet<string> = new Set(Object.keys(MACROS));
+/**
+ * Macros that render as text rather than a link.
+ *
+ * `Deprecated_Inline.ejs` emits an icon with a `Deprecated` tooltip and no
+ * href, so it has no `Link` to return. It is the only one, and it appears
+ * once — in the Firefox 2 feed-readers sub-page.
+ */
+const TEXT_MACROS: Record<string, (arguments_: string[]) => string> = {
+  /** `Deprecated_Inline.ejs` */
+  deprecated_inline() {
+    return '**Deprecated**';
+  },
+};
+
+export const MACRO_NAMES: ReadonlySet<string> = new Set([
+  ...Object.keys(MACROS),
+  ...Object.keys(TEXT_MACROS),
+]);
 
 export interface MacroResult {
   markdown: string;
@@ -279,11 +296,44 @@ export interface MacroResult {
   docUrl: string;
 }
 
+/**
+ * Expands one macro call to its bare text, for a call inside a code span.
+ *
+ * A link can't be nested in a code span, but leaving the call unexpanded
+ * would print `{{cssxref(…)}}` to the reader — the very thing the unknown
+ * macro error exists to prevent. The text is what the link would have been
+ * labelled with, so `` `{{cssxref("justify-content")}}: space-evenly` ``
+ * reads as `justify-content: space-evenly`, which is what it means.
+ */
+export function expandMacroText(
+  call: MacroCall,
+  context: MacroContext,
+): string {
+  const text = TEXT_MACROS[call.name];
+  if (text) return stripEmphasis(text(call.args));
+
+  const macro = MACROS[call.name];
+  if (!macro) {
+    throw new Error(`unknown macro {{${call.name}}}`);
+  }
+  return macro(call.args, context).text;
+}
+
+/** The text macros' output is markdown; inside a code span it is literal. */
+function stripEmphasis(markdown: string): string {
+  return markdown.replaceAll('**', '');
+}
+
 /** Expands one macro call, or throws if its name isn't in the table. */
 export function expandMacro(
   call: MacroCall,
   context: MacroContext,
 ): MacroResult {
+  const text = TEXT_MACROS[call.name];
+  if (text) {
+    return { markdown: text(call.args), docUrl: '' };
+  }
+
   const macro = MACROS[call.name];
   if (!macro) {
     throw new Error(`unknown macro {{${call.name}}}`);
