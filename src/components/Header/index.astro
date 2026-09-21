@@ -248,4 +248,12 @@ const currentPath = Astro.url.pathname;
   .cta {
     grid-area: cta;
   }
+
+  /*
+   * Lift the button off the purple gradient background.
+   */
+  .overlay .cta {
+    box-shadow: 0 0.125rem 0.5rem
+      color-mix(in srgb, var(--color-black-fixed) 30%, transparent);
+  }
 </style>
