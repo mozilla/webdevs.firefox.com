@@ -315,9 +315,6 @@
     font-size: var(--text-body-main);
     line-height: 1.65;
 
-    /* The light theme is TODO */
-    color-scheme: dark;
-
     /* For 'responsive code' container queries */
     container: code / inline-size;
 
@@ -327,10 +324,10 @@
       padding-inline: var(--space-32);
     }
 
-    /* Overriding Shiki stuff */
+    /* Shiki writes the theme's own background onto the pre; the theme sets
+       it transparent so this block's background shows through. */
     & pre {
       margin: 0;
-      background-color: transparent !important;
     }
 
     /* Load-bearing. Ensure custom font is used. */

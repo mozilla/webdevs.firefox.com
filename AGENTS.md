@@ -395,6 +395,15 @@ Three things bind from outside those files:
   `code` hits the same UA declaration, which is why `prose.css` states the
   family there too.
 
+The colors are `lib/markdown/code-theme.ts`, a Shiki theme whose every color
+is a CSS custom property rather than a hex. Shiki copies a color it does not
+recognize straight into the span's inline `style`, so one theme covers both
+schemes: each token resolves through `light-dark()` in `tokens.css` at paint
+time, the same way the rest of the site does it. Read that file's doc comment
+before changing a scope — it records which six roles the design actually
+specifies, the rule used to extend them to every other language, and which of
+the design sample's own inconsistencies were deliberately kept.
+
 **Every block is wrapped in `.code-block`, variants or not**, so one set of
 rules owns the block's background, padding and query container however the
 block was treated. A block that opted out, one whose language has no parser
@@ -501,8 +510,8 @@ that is an interpretation rather than a spec. The code block's inline padding
 holding at 1rem until 30rem is one such interpretation: the design's 2rem
 either side is a fifth of the text area on a phone.
 
-Syntax highlighting is still Shiki's stock `github-dark`, so the
-`--color-code-*` tokens the design specifies are unused and `.code-block`
-pins `color-scheme: dark` to keep that theme legible in both schemes. Moving
-to the design's palette means configuring a Shiki theme against those tokens
-and deleting that one line.
+The syntax theme's coverage is bounded by the CSS grammar's property list,
+which is an allowlist older than most of what this site writes about. An
+unrecognized property still gets its color, but the value beside it stays
+plain — `lib/markdown/code-theme.ts` explains why the theme cannot fix that
+end of it. Widening it means a newer grammar upstream, not a change here.

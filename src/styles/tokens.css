@@ -45,6 +45,11 @@
   --color-code-red: light-dark(#c02e2b, #fb4640);
   --color-code-purple: light-dark(#5c3ab0, #9f87f8);
   --color-code-green: light-dark(#1f6807, #4ccb27);
+  --color-code-blue: color-mix(
+    in oklch,
+    var(--color-code-purple) 75%,
+    var(--color-code-green) 25%
+  );
 
   /* Spacing scale */
   --space-0: 0;

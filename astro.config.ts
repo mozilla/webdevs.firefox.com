@@ -5,6 +5,7 @@ import mdx from '@astrojs/mdx';
 import preact from '@astrojs/preact';
 
 import { writeCssModuleTypes } from './lib/css-module-types.ts';
+import { codeTheme } from './lib/markdown/code-theme.ts';
 import { codeWidths } from './lib/markdown/code-widths/plugin.ts';
 import { transformerIndentWrap } from './lib/markdown/code-widths/indent-wrap.ts';
 import { definitionGroups } from './lib/markdown/definition-groups.ts';
@@ -22,6 +23,9 @@ export default defineConfig({
   markdown: {
     /* Responsive code block widths */
     shikiConfig: {
+      /* Syntax colors from the design's Code * variables */
+      theme: codeTheme,
+      /* Responsive code block widths */
       transformers: [transformerIndentWrap()],
     },
     processor: satteri({
