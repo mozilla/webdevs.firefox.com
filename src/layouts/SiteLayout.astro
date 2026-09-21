@@ -77,6 +77,26 @@ const {
     }
   }
 
+  /*
+   * Parallax scroll the header.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .header-over-hero .header-slot {
+        animation: header-parallax linear both;
+        /* After the shorthand, which resets animation-timeline. */
+        animation-timeline: view();
+        animation-range: exit-crossing 0% exit-crossing 200%;
+      }
+    }
+  }
+
+  @keyframes header-parallax {
+    to {
+      translate: 0 100%;
+    }
+  }
+
   .skip-link {
     position: absolute;
     top: var(--space-8);

@@ -93,6 +93,26 @@ const { title, description, sections = [], preloadCodeFont } = Astro.props;
     color: var(--color-heading);
   }
 
+  /*
+   * Parallax scroll the hero.
+   */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .hero {
+        animation: hero-parallax linear both;
+        /* After the shorthand, which resets animation-timeline. */
+        animation-timeline: view();
+        animation-range: exit-crossing;
+      }
+    }
+  }
+
+  @keyframes hero-parallax {
+    to {
+      translate: 0 50%;
+    }
+  }
+
   .hero-inner {
     display: grid;
     justify-items: center;
@@ -109,6 +129,10 @@ const { title, description, sections = [], preloadCodeFont } = Astro.props;
    * gradient and runs to the foot of the article.
    */
   .panel {
+    /* Allow it to sit on top of the hero's parallax effect. */
+    position: relative;
+    z-index: 1;
+
     /* Narrow enough that the gutter costs more than the inset is worth: the
        card goes full-bleed and its sides meet the viewport, leaving the
        corners to mark the top edge on their own. */
