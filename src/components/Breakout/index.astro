@@ -1,0 +1,46 @@
+---
+/**
+ * Escapes the prose column out to the full width of the content panel, for a
+ * figure or video the design runs wider than the text.
+ *
+ * How far it may reach is the layout's business rather than the component's,
+ * so `ArticleLayout` states it as `--breakout-start` / `--breakout-end`. Two
+ * values, not one: the contents list takes the end side of the card at desktop
+ * widths, which leaves the prose column sitting off-center in it. Used
+ * anywhere that says nothing about its room — a `Note`'s inner prose, say —
+ * both fall back to no escape at all.
+ *
+ * Belongs at the top level of an article's prose. In a list or a table cell
+ * the margins would still apply, and would tear the content out of the thing
+ * indenting it.
+ *
+ * Content keeps its own width: an image narrower than the panel is centered
+ * rather than stretched. Nothing here carries `prose-end`, so a `figcaption`
+ * is still styled as prose — put it on a wrapper inside if a subtree should
+ * opt out.
+ */
+---
+
+<div class="breakout">
+  <slot />
+</div>
+
+<style>
+  .breakout {
+    margin-inline: calc(-1 * var(--breakout-start, 0rem))
+      calc(-1 * var(--breakout-end, 0rem));
+  }
+
+  /*
+   * Slotted content is rendered by the file that wrote it, so it carries that
+   * file's scope hash and not this component's — `:global` is what lets the
+   * rule reach it at all.
+   *
+   * An auto inline margin centers a replaced element narrower than the panel
+   * and does nothing to one that fills it, which is why this is narrower than
+   * a rule on every child: a list's own indent would lose to it.
+   */
+  .breakout :global(:is(img, picture, svg, video, iframe)) {
+    margin-inline: auto;
+  }
+</style>

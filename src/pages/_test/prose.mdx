@@ -3,6 +3,7 @@ title: Prose kitchen sink
 ---
 
 import Blockquote from '~/components/Blockquote';
+import Breakout from '~/components/Breakout';
 import Note from '~/components/Note';
 
 This page exercises every block and inline construct the prose styles cover,
@@ -390,6 +391,18 @@ A code block with no language, and one that is a single short line:
 $ pnpm dev
 ```
 
+A block inside a list item, which keeps its padding rather than hanging it
+outside the column — only a block at the top level of the prose pulls out, and
+one indented by a list has nothing to align with if it does:
+
+- An item introducing the block below.
+
+  ```js
+  await navigator.clipboard.writeText(location.href);
+  ```
+
+- A second item, so the first is not also the last.
+
 ## Notes
 
 <Note>
@@ -405,7 +418,15 @@ $ pnpm dev
 - A first item inside the panel.
 - A second item.
 
-And inline `code`, plus an [external link](https://developer.mozilla.org/).
+And inline `code`, plus a fenced block, which stays within the panel's padding
+rather than hanging outside it — the note is a box in the column, not the
+column itself:
+
+```js
+document.startViewTransition(() => update(data));
+```
+
+And an [external link](https://developer.mozilla.org/).
 
 </Note>
 
@@ -421,3 +442,42 @@ covers:
 ---
 
 Hello!
+
+## Breakouts
+
+A breakout escapes the prose column out to the full width of the card, for
+media the design runs wider than the text. The placeholder below fills that
+width at every viewport, and at desktop widths it reaches across the contents
+list to the card's far edge.
+
+<Breakout>
+  <svg
+    role="img"
+    aria-label="Placeholder for a figure spanning the whole card"
+    viewBox="0 0 32 9"
+    style={{
+      width: '100%',
+      borderRadius: '0.75rem',
+      background: 'var(--color-background-spot)',
+    }}
+  />
+</Breakout>
+
+Content inside keeps its own width rather than being stretched to fill, so an
+image with less to show than the card is wide stays its own size and centers.
+This one is capped below the card's width and above the column's, which is
+the case neither the column nor a full-bleed treatment covers.
+
+<Breakout>
+  <svg
+    role="img"
+    aria-label="Placeholder for a figure wider than the text but narrower than the card"
+    viewBox="0 0 32 9"
+    style={{
+      width: '56rem',
+      maxWidth: '100%',
+      borderRadius: '0.75rem',
+      background: 'var(--color-background-spot)',
+    }}
+  />
+</Breakout>

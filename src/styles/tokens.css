@@ -112,4 +112,45 @@
   /* Layout */
   --content-max-width: 88rem;
   --gutter: var(--space-16);
+
+  /*
+   * The inset from the content panel's edge to the prose column, and so the
+   * distance a top-level code block pulls out by to put its text on the
+   * article's own margin. One value for both, so the widest a block can get
+   * is flush with the card rather than hanging outside it.
+   *
+   * The design's 32 either side is a fifth of the text area on a phone, so
+   * the wider value waits until there is room to spend on it.
+   */
+  --panel-inset: var(--space-16);
+}
+
+@media (width >= 30rem) {
+  :root {
+    --panel-inset: var(--space-24);
+  }
+}
+
+/*
+ * The space either side of the content column, declared by whatever lays
+ * `.prose` out — `.panel-inner` in `ArticleLayout`, the page itself on
+ * `/test/code/` — and read from inside the prose by anything escaping the
+ * column: a top-level code block, a `Breakout`.
+ *
+ * It is how much room there is to escape into, so the zero it starts at means
+ * "none offered", and a layout that says nothing gets contents that stay put
+ * rather than ones that overflow the page.
+ *
+ * Registered because that value is measured with `100cqi`, and container
+ * units always resolve against the nearest container ancestor whatever its
+ * name — `.prose` is one, so an unregistered property would substitute its
+ * tokens at the use site and measure the prose column instead of the thing
+ * holding it. A registered `<length>` is computed once, on the element that
+ * declares it, and inherits down as an absolute length no container can
+ * shadow.
+ */
+@property --column-side {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0;
 }

@@ -8,16 +8,21 @@ import * as prettier from 'prettier';
  * can hold.
  *
  * Derived from the article measure and Inconsolata's 0.5em advance: the prose
- * column is capped at 43.5rem, the code block spends 2rem of that on inline
- * padding either side, so its text area holds 79 characters at full desktop
- * measure. It holds about 40 on a 390px phone and about 32 on a 320px one,
- * and below roughly 40 Prettier's output degrades to one identifier per line,
- * which reads worse than wrapping. So 40 is the floor and the narrowest
- * viewports wrap a little rather than getting a ladder rung of their own.
+ * column is capped at 43.5rem, and a block at the top level of the prose hangs
+ * its inline padding outside that column, so its text area is the full cap —
+ * 87 characters at full desktop measure. It holds about 45 on a 390px phone
+ * and about 36 on a 320px one, and below roughly 40 Prettier's output degrades
+ * to one identifier per line, which reads worse than wrapping. So 40 is the
+ * floor and the narrowest viewports wrap a little rather than getting a ladder
+ * rung of their own.
+ *
+ * The top rung is the only one not on the 8-character step, and it is the one
+ * that has to be exact: 87 characters is 43.5rem to the pixel, so the widest
+ * variant appears precisely when the block is at full measure.
  *
  * Keep this list and the `@container` blocks in `prose.css` in step.
  */
-export const TIERS = [40, 48, 56, 64, 72, 79];
+export const TIERS = [40, 48, 56, 64, 72, 80, 87];
 
 /**
  * Code-fence languages mapped to the Prettier parser to use.

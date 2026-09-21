@@ -2,6 +2,22 @@
  * Prose styles for long-form content.
  * Uses donut scoping so inner components can opt out of the prose styles & back again.
  */
+
+/*
+ * A prose that opens inside another — a `Note`'s body — is a box within the
+ * column rather than the column itself, so it has no room to offer anything
+ * escaping it. Without this the note's own padding is what a code block would
+ * hang outside of.
+ *
+ * Outside the scope below, since a nested prose starts a fresh one and so is
+ * never in its parent's.
+ */
+.prose .prose {
+  --column-side: 0rem;
+  --breakout-start: 0rem;
+  --breakout-end: 0rem;
+}
+
 @scope (.prose) to (.prose-end) {
   :scope {
     color: var(--color-text);
@@ -24,6 +40,7 @@
   p,
   dl,
   .code-block,
+  .breakout,
   blockquote,
   figure,
   .table-scroll,
@@ -306,7 +323,9 @@
    * Code blocks
    */
   .code-block {
-    padding: var(--space-16);
+    /* Inline padding from the token the panel's own side padding uses, which
+       is what the pull-out below cancels. */
+    padding: var(--space-16) var(--panel-inset);
     border-radius: 0.75rem;
     background-color: var(--color-background-spot);
     color: var(--color-code-text);
@@ -317,12 +336,6 @@
 
     /* For 'responsive code' container queries */
     container: code / inline-size;
-
-    /* The design's 32 either side is a fifth of the text area on a phone, so
-       the wider inline padding waits for room to spend on it. */
-    @media (width >= 30rem) {
-      padding-inline: var(--space-32);
-    }
 
     /* Shiki writes the theme's own background onto the pre; the theme sets
        it transparent so this block's background shows through. */
@@ -383,6 +396,35 @@
   }
 
   /*
+   * A block at the top level of the prose hangs its padding outside the
+   * column, so the code itself starts on the article's own margin. Direct
+   * children only: a block inside a list or a table cell is indented by that
+   * context, and pulling it out would align it with nothing.
+   *
+   * It can only take room the layout says it has, so the widest a block gets
+   * is flush with whatever holds the column — never outside it, and never
+   * scrolling the page sideways. A layout that offers none leaves
+   * `--column-side` at zero and the block stays where it is.
+   */
+  :scope > .code-block {
+    --pull: min(var(--panel-inset), var(--column-side));
+
+    margin-inline: calc(-1 * var(--pull));
+
+    /*
+     * Square once the block is flush, where a radius would leave the page
+     * showing through the corners. What is left over is the room it could not
+     * use: the offer it did not spend, plus the padding it could not hang
+     * outside. Both are zero only when it took everything there was and still
+     * wanted more.
+     */
+    border-radius: min(
+      0.75rem,
+      calc(var(--column-side) - var(--pull) + var(--panel-inset) - var(--pull))
+    );
+  }
+
+  /*
    * Container queries to display the right code variant based on the block's width.
    */
   .code-block > .code-variant {
@@ -424,11 +466,19 @@
       display: block;
     }
   }
-  @container code (width >= 79ch) {
+  @container code (width >= 80ch) {
     .code-block > .code-variant {
       display: none;
     }
-    .code-block > .tier-79 {
+    .code-block > .tier-80 {
+      display: block;
+    }
+  }
+  @container code (width >= 87ch) {
+    .code-block > .code-variant {
+      display: none;
+    }
+    .code-block > .tier-87 {
       display: block;
     }
   }

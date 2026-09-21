@@ -23,21 +23,40 @@ const { title } = frontmatter as { title: string };
 ---
 
 <SiteLayout title={title}>
-  <div class="page wrapper">
-    <h1>{title}</h1>
+  {/*
+    The container the page's own `--column-side` is measured against, which an
+    article gets from its panel. It spans the initial containing block, so
+    `100cqi` here is the viewport less the scrollbar `scrollbar-gutter: stable`
+    reserves — the width `100vw` would overstate.
+  */}
+  <div class="page-container">
+    <div class="page">
+      <h1>{title}</h1>
 
-    <div class="prose">
-      <Content />
+      <div class="prose">
+        <Content />
+      </div>
     </div>
   </div>
 </SiteLayout>
 
 <style>
+  .page-container {
+    container-type: inline-size;
+  }
+
   .page {
+    /* Room either side of the column, which is what lets a top-level code
+       block hang its padding outside the measure here as it does in an
+       article. Stated as padding as well, so the block runs out of page at
+       the same point the value says it does. */
+    --column-side: max(var(--panel-inset), calc((100cqi - 43.5rem) / 2));
+
     display: grid;
     gap: var(--space-40);
     justify-content: center;
     grid-template-columns: minmax(0, 43.5rem);
+    padding-inline: var(--column-side);
     padding-block: var(--space-40) var(--space-80);
   }
 

@@ -35,7 +35,12 @@ const { title, description, sections = [], preloadCodeFont } = Astro.props;
     </div>
 
     <div class="panel">
-      <div class="panel-inner wrapper">
+      {/*
+        `has-toc` so the second column exists only when something fills it: an
+        empty track still grows to its growth limit, which would leave the
+        prose off-center on a page with no sections.
+      */}
+      <div class:list={['panel-inner', { 'has-toc': sections.length > 0 }]}>
         {/*
           Written before the prose so that the default layout, which stacks the
           contents above the article, agrees with the reading and tab order.
@@ -133,6 +138,13 @@ const { title, description, sections = [], preloadCodeFont } = Astro.props;
     position: relative;
     z-index: 1;
 
+    /* The container `--column-side` below is measured against. It has to be
+       this element rather than the one that declares that value, since an
+       element cannot query its own container — and measuring here also means
+       the width being read cannot depend on anything the value goes on to
+       affect. */
+    container: panel / inline-size;
+
     /* Narrow enough that the gutter costs more than the inset is worth: the
        card goes full-bleed and its sides meet the viewport, leaving the
        corners to mark the top edge on their own. */
@@ -142,43 +154,82 @@ const { title, description, sections = [], preloadCodeFont } = Astro.props;
     background-color: var(--color-background-main);
     box-shadow: 0 0.25rem 1.25rem rgb(0 0 0 / 0.15);
 
-    /* Room for the inset: the gutter is carved out of the page cap, so the
-       card sits inside it on both sides rather than running full-bleed. */
-    @media (width >= 30rem) {
-      margin-inline: var(--gutter);
-    }
-
     /* The design's 48 radius is drawn for a 1408-wide card; it only stops
        eating a noticeable share of the width once the card is this wide. */
     @media (width >= 48rem) {
       border-start-start-radius: 3rem;
       border-start-end-radius: 3rem;
     }
+
+    /* Room for the inset: the gutter is carved out of the page cap, so the
+       card sits inside it on both sides rather than running full-bleed. */
+    @media (width >= 51rem) {
+      margin-inline: var(--gutter);
+    }
   }
 
   .panel-inner {
+    /* The track sizes, named because the side padding below is derived from
+       the same numbers the grid is built from. The prose column is capped at
+       the design's 43.5rem throughout; the other two are zero until the TOC
+       moves alongside. */
+    --prose-width: 43.5rem;
+    --toc-width: 0rem;
+    --column-gap: 0rem;
+
+    /*
+     * The space either side of the columns, computed rather than left as free
+     * space for `justify-content: center` to absorb. A breakout needs to know
+     * how far it may reach to escape its column, and free space is not a
+     * length anything can read. Registered in `tokens.css`, which is what
+     * makes the `100cqi` measure `.panel` here rather than `.prose` at the
+     * use site.
+     */
+    --column-side: max(
+      var(--panel-inset),
+      calc(
+        (100cqi - var(--prose-width) - var(--column-gap) - var(--toc-width)) / 2
+      )
+    );
+
+    /* How far a breakout may pull out on each side, which is symmetrical
+       until the TOC takes the end side. */
+    --breakout-start: var(--column-side);
+    --breakout-end: var(--column-side);
+
     display: grid;
     /* Too narrow for the TOC to sit beside the prose, so it stacks above —
-       which is also its markup order. The prose column is capped at the
-       design's 43.5rem throughout. */
+       which is also its markup order. */
     grid-template-areas:
       'toc'
       'prose';
-    grid-template-columns: minmax(0, 43.5rem);
-    justify-content: center;
-    gap: var(--space-40);
+    grid-template-columns: minmax(0, var(--prose-width));
+    padding-inline: var(--column-side);
+    row-gap: var(--space-40);
     padding-block: var(--space-40) var(--space-80);
 
     /* Room for the TOC's 13.8125rem beside the prose, with the pair centered
        in the card. The areas put the TOC second visually even though it comes
        first in the markup. */
     @media (width >= 75rem) {
-      grid-template-areas: 'prose toc';
-      grid-template-columns:
-        minmax(0, 43.5rem)
-        minmax(0, 13.8125rem);
-      gap: var(--space-80);
       padding-block-start: 7.5rem;
+
+      &.has-toc {
+        --toc-width: 13.8125rem;
+        --column-gap: var(--space-80);
+        /* The column sits off-center in the card once the TOC is beside it,
+           so a breakout reaches further on this side — across the gap and the
+           TOC both, which is what puts it at the card's edge. */
+        --breakout-end: calc(
+          var(--column-side) + var(--column-gap) + var(--toc-width)
+        );
+
+        grid-template-areas: 'prose toc';
+        grid-template-columns:
+          minmax(0, var(--prose-width))
+          minmax(0, var(--toc-width));
+        column-gap: var(--column-gap);
+      }
     }
   }
 
