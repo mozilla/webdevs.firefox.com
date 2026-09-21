@@ -44,6 +44,40 @@ export default defineConfig({
     }),
   },
   vite: {
+    build: {
+      /*
+       * The oldest browsers Lightning CSS, which minifies the built CSS, may
+       * assume. Left unset it assumes every browser implements every draft,
+       * and writes some of them out: `animation-timeline: view()` came back
+       * folded into the `animation` shorthand, a Level 2 syntax that was
+       * withdrawn over a parsing ambiguity and that nothing implements, which
+       * made the whole declaration invalid and the parallax silently dead in
+       * the built site while dev, which doesn't minify, was fine. That is
+       * parcel-bundler/lightningcss#1283, open, with an unreviewed fix in
+       * #1306; Astro closed its own copy as upstream.
+       *
+       * The list has to keep a non-Chromium browser in it. Lightning CSS
+       * takes the shorthand from MDN's data, which has Chrome supporting it
+       * since 115 and records the caveat in a `partial_implementation` flag
+       * that doesn't reach the check, so it folds whenever every listed
+       * browser is Chromium. Firefox and Safari are what hold this open, not
+       * the version numbers.
+       *
+       * Recent versions rather than a wide baseline, because the lowering it
+       * does below them is worse than the modern syntax it avoids: an older
+       * Safari or Firefox turns every `light-dark()` into a pair of rules and
+       * flattens all the nesting, and lowered `light-dark()` no longer
+       * answers to a pinned `color-scheme`, which is how the footer and the
+       * code blocks get their colors. The numbers are where the narrowest
+       * thing here already lands — `text-box` is Chrome 133 and Safari 18.2 —
+       * so this is not a claim about what the site supports. Everything below
+       * degrades, as it did before.
+       *
+       * It has to be `build.cssTarget`: the minify path spreads
+       * `css.lightningcss` first and then overwrites `targets` with this.
+       */
+      cssTarget: ['chrome133', 'edge133', 'firefox145', 'safari18.2'],
+    },
     plugins: [proseComponents()],
     resolve: {
       extensions: [

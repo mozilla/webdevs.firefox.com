@@ -212,6 +212,12 @@ a property and its override.
   providers. Only the upright faces are preloaded, so the italic file is
   fetched only when italic text appears.
 - `build.format: 'preserve'` — keep file paths as authored.
+- `build.cssTarget` pins the browsers Lightning CSS minifies for, and is
+  load-bearing in both directions — unset it emits draft syntax nothing
+  implements, lower it and `light-dark()` stops answering to a pinned
+  `color-scheme`. Its comment in `astro.config.ts` has the whole story.
+  Minified CSS is only in the built site, so a bug here is invisible in
+  `pnpm dev`.
 
 ## Shared components
 
