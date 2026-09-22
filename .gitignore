@@ -28,5 +28,6 @@ pnpm-debug.log*
 .vscode
 
 # visual regression runs — builds, screenshots, and the local stand-in for
-# the baseline object store. Only tests/visual/baseline.txt is committed.
+# the baseline object store. Only the hash files under tests/visual/ are
+# committed.
 .vrt/

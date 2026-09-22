@@ -84,17 +84,15 @@ export const storeDirectory = path.join(vrtDirectory, 'store');
  */
 export const blobCacheDirectory = path.join(vrtDirectory, 'blob-cache');
 
-/**
- * Which set of browsers a run covers, and so which baseline it compares
- * against. `stable` blocks; `prerelease` is advisory.
- *
- * The two are kept entirely apart — their own key prefix and their own
- * hash file — so that beta churn never touches the blocking baseline.
+/*
+ * The two tiers are kept entirely apart — their own key prefix and their
+ * own hash file — so that beta churn never touches the blocking baseline.
  * Chrome Beta ships weekly and any release can move a pixel; if accepting
  * that noise also rewrote the stable reference, the blocking check would
  * inherit it.
  */
-/** The committed hash file for a tier — the only artefact in git. */
+
+/** The committed hash file for a tier — the only artifact in git. */
 export const baselineFileFor = (which: Tier): string =>
   fileURLToPath(
     new URL(

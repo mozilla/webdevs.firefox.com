@@ -8,8 +8,8 @@
  * and the text file conflicts on exactly the pull requests that both
  * changed rendering.
  */
-import { mkdir, readFile, writeFile, rm, cp } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
+import { mkdir, readFile, writeFile, rename, rm, cp } from 'node:fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
 import path from 'node:path';
 
 import {
@@ -80,7 +80,31 @@ export const baselineKey = (tier: Tier, hash: string, name: string): string =>
   `${baselinePrefixFor(tier)}/${hash}/${name}`;
 
 /**
- * Fills `.vrt/baseline/` with the baseline `hash` names.
+ * Writes a blob into the content-keyed cache under the hash of its bytes.
+ *
+ * Write to a scratch name and rename, rather than writing in place. The
+ * file's name is a hash of its contents and nothing verifies that again —
+ * a hydrate that finds the name assumes the bytes — so a run interrupted
+ * mid-write would leave a truncated file sitting under the full hash's
+ * name, and the next hydrate would copy it into the baseline as the image
+ * to compare against. Wrong expected pixels, and no error anywhere.
+ * `rename` within a directory is atomic, so the name appears only once
+ * every byte behind it is there.
+ *
+ * The scratch name is unique per write because two shots can legitimately
+ * have identical bytes — a `color-scheme: dark` footer looks the same in
+ * both schemes — so hydrating them concurrently writes one hash twice.
+ */
+const writeBlob = async (hash: string, body: Buffer): Promise<void> => {
+  await mkdir(blobCacheDirectory, { recursive: true });
+  const blob = path.join(blobCacheDirectory, hash);
+  const scratch = `${blob}.${randomUUID()}.part`;
+  await writeFile(scratch, body);
+  await rename(scratch, blob);
+};
+
+/**
+ * Fills `.vrt/<tier>/baseline/` with the baseline `hash` names.
  *
  * A single listing gives every object's hash before a byte is downloaded,
  * so anything already in the content-keyed blob cache is copied from disk
@@ -101,7 +125,6 @@ export const hydrateBaseline = async (
 
   const prefix = `${baselinePrefixFor(tier)}/${hash}/`;
   const objects = await store.list(prefix);
-  await mkdir(blobCacheDirectory, { recursive: true });
 
   let fetched = 0;
 
@@ -123,7 +146,7 @@ export const hydrateBaseline = async (
       const body = await store.get(object.key);
       fetched += 1;
       await writeFile(target, body);
-      await writeFile(cached, body);
+      await writeBlob(object.hash, body);
     }),
   );
 
@@ -132,6 +155,5 @@ export const hydrateBaseline = async (
 
 /** Adds a blob to the content-keyed cache, so a later hydrate skips it. */
 export const cacheBlob = async (body: Buffer): Promise<void> => {
-  await mkdir(blobCacheDirectory, { recursive: true });
-  await writeFile(path.join(blobCacheDirectory, hashBytes(body)), body);
+  await writeBlob(hashBytes(body), body);
 };

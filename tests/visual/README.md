@@ -30,9 +30,14 @@ bucket exists, which is the point of committing the hash now.
 | `pnpm vrt:accept`            | Promote the last run to the baseline    |
 | `pnpm vrt:report`            | Open the Playwright HTML report         |
 | `pnpm vrt:shell`             | Shell into the container, for debugging |
-| `pnpm vrt:build`             | Just the build, outside Docker          |
-| `pnpm vrt:prerelease`        | The same, on the beta channels          |
+| `pnpm vrt:prerelease`        | The same as `pnpm vrt`, on the betas    |
 | `pnpm vrt:accept:prerelease` | Promote the last pre-release run        |
+| `pnpm vrt:report:prerelease` | Open the pre-release report             |
+
+Arguments are passed through to Playwright, so `pnpm vrt --project=chrome`
+or `pnpm vrt --grep footer` narrows a run. `pnpm vrt:accept` will not
+promote one of those, though — it refuses a run that produced fewer shots
+than the matrix describes.
 
 The first run on a clean checkout has no baseline, so every shot is
 reported as missing. That is the right answer — there is nothing to compare
@@ -52,6 +57,14 @@ against — and `pnpm vrt:accept` records one.
 
 Everything runs in the container, so the pixels do not depend on whose
 machine produced them.
+
+The image is built on first use and reused after that. `node_modules` and
+the pnpm and corepack caches live in named Docker volumes —
+`webdevs-firefox-vrt-node-modules` and `webdevs-firefox-vrt-cache` — so
+the install is paid once rather than on every run, which is 11.6s against
+0.6s. `pnpm install --frozen-lockfile` still runs each time, so neither
+volume can drift from the lockfile; `docker volume rm` one if it is ever
+wedged.
 
 ## The browser matrix
 
@@ -137,11 +150,11 @@ changing a visible stop in `ArticleLayout`'s radial gradient: 24
 `header-overlay` shots and 24 `prose` shots fail. Two pages using real
 layouts beat one page using a stand-in.
 
-## What is not stabilised
+## What is not stabilized
 
 Nothing, and there is no VRT build either — `pnpm vrt` runs
 `INCLUDE_TEST_PAGES=1 astro build` and screenshots `dist/`. A second Astro
-config existed to add stabilisation and an `outDir`; once the stabilisation
+config existed to add stabilization and an `outDir`; once the stabilization
 was gone the `outDir` was the only thing left, and sharing `dist/` between
 a production build and a test-pages build is already how this repo works.
 
@@ -170,7 +183,7 @@ none`). `scrollbar-gutter: stable` in `global.css` reserves 15px
   prevent — and its `decoding="sync"` overrode the site's own
   `decoding="async"`, making the capture less faithful rather than more.
 
-The lesson worth keeping: **a stabilisation rule that is not measured is a
+The lesson worth keeping: **a stabilization rule that is not measured is a
 rule that changes what you are testing for no reason.** Before adding one,
 empty it out and show the failure it prevents.
 
@@ -216,6 +229,14 @@ accept.
 
 The hash is content-derived, so reverting a CSS change returns the baseline
 to its previous hash exactly.
+
+It also checks the store rather than trusting `baseline.txt`, which matters
+precisely because the store is local. After a `rm -rf .vrt` the committed
+hash names a folder that is no longer there, and a re-render that produces
+the same pixels computes the same hash — so "the hash already matches"
+would skip the upload and leave the store empty, with every run after it
+reporting every shot as missing. Accept uploads whenever the store is not
+already holding the bytes, whatever the hash file says.
 
 ## Files
 

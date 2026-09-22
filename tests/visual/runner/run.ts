@@ -2,7 +2,7 @@
  * `pnpm vrt` — build the specimen pages, hydrate the baseline, run the
  * matrix.
  *
- * This is the part that runs *inside* the container. `tests/visual/docker.ts`
+ * This is the part that runs *inside* the container. `docker.ts` beside it
  * is what puts it there; running this file directly on a host works and is
  * useful for debugging, but the pixels it produces are your machine's and
  * will not match a baseline accepted from the container.
@@ -13,8 +13,8 @@
  *    with the flag that includes the specimen pages — there is no
  *    VRT-specific config, so what is screenshotted is what ships
  * 2. read `tests/visual/baseline.txt`, list that baseline folder, and
- *    hydrate `.vrt/baseline/` — downloading only what the content-keyed
- *    blob cache does not already hold
+ *    hydrate `.vrt/<tier>/baseline/` — downloading only what the
+ *    content-keyed blob cache does not already hold
  * 3. run Playwright, which starts the static server itself and compares
  *    against the hydrated snapshots
  *
@@ -56,10 +56,11 @@ const run = (command: string, arguments_: string[]): Promise<number> =>
 const which = tier();
 
 /*
- * Clear last run's output first. `.vrt/current/` is what `pnpm vrt:accept`
- * promotes, so a shot left behind by a target or width that has since
- * been removed would otherwise be accepted as part of the new baseline.
- * The results directory goes too, so the report only ever shows this run.
+ * Clear last run's output first. `.vrt/<tier>/current/` is what
+ * `pnpm vrt:accept` promotes, so a shot left behind by a target or width
+ * that has since been removed would otherwise be accepted as part of the
+ * new baseline. The results directory goes too, so the report only ever
+ * shows this run.
  */
 await Promise.all([
   rm(currentDirectoryFor(which), { recursive: true, force: true }),

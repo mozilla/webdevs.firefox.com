@@ -3,15 +3,15 @@
  *
  * The shot's name is its key in the store —
  * `<target>/<browser>/<width>/<scheme>.png` — and `snapshotPathTemplate`
- * writes it straight into `.vrt/baseline/`, so hydrating a baseline folder
- * into that directory needs no translation between the two layouts.
+ * writes it straight into `.vrt/<tier>/baseline/`, so hydrating a baseline
+ * folder into that directory needs no translation between the two layouts.
  *
  * A test per shot rather than one test looping over widths, so the report
  * names the thing that changed and a failure at 375 doesn't stop 1440 from
  * being captured.
  *
- * Every capture is also written to `.vrt/current/` under that same key,
- * whether it matched or not. `toHaveScreenshot` does write a changed shot
+ * Every capture is also written to `.vrt/<tier>/current/` under that same
+ * key, whether it matched or not. `toHaveScreenshot` does write a changed shot
  * to the results directory, but under Playwright's own flattened naming of
  * the *test* rather than the snapshot path — and recovering a key with
  * slashes in it from a name that joined them with `-` is ambiguous the
@@ -55,13 +55,13 @@ for (const target of targets) {
            */
           /* eslint-disable-next-line unicorn/isolated-functions --
              `document` is the page's, not this module's: the body of a
-             `page.evaluate` callback is serialised and run in the browser,
+             `page.evaluate` callback is serialized and run in the browser,
              which the rule cannot see. */
           await page.evaluate(() => document.fonts.ready);
 
           /*
            * The key as path segments, not as one slashed string. Playwright
-           * sanitises a string name before using it as a file path, and
+           * sanitizes a string name before using it as a file path, and
            * that turns every `/` into `-` — the baseline tree would come
            * out flat as `buttons-firefox-1440-light.png` while the store's
            * layout is nested, and a name with a hyphen already in it
@@ -91,7 +91,7 @@ for (const target of targets) {
           });
 
           /*
-           * Re-compress before storing. The browsers optimise for capture
+           * Re-compress before storing. The browsers optimize for capture
            * speed rather than size, and `zlib` level 9 over the same pixels
            * takes roughly 30% off — most of it from the tall `fullPage`
            * shots, which are the ones that dominate a baseline.

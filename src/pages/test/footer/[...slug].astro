@@ -11,8 +11,9 @@ import { testPagePaths } from '~/pages/_test/_test-pages';
  * worth of content.
  *
  * It pins `color-scheme: dark` on itself, so it should look identical in
- * both schemes. The visual regression suite captures this page in each, and
- * a diff between the two is the regression.
+ * both schemes. The visual regression suite captures this page in each and
+ * compares each against its own baseline — so if the pinning breaks, it is
+ * the light shot that moves while the dark one holds still.
  */
 export const getStaticPaths = testPagePaths;
 ---

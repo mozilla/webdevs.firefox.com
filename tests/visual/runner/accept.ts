@@ -3,7 +3,7 @@
  *
  * What it does, and the order matters:
  *
- * 1. Read every image the run wrote to `.vrt/current/`. The spec writes
+ * 1. Read every image the run wrote to `.vrt/<tier>/current/`. The spec writes
  *    each capture there under its store key whether or not it matched, so
  *    this is the complete set by construction — accept never has to merge
  *    the run with the hydrated baseline, or recover a key from Playwright's
@@ -33,8 +33,8 @@ import {
   baselineHash,
   baselineKey,
   cacheBlob,
-  readBaselineReference as readBaselineReference,
-  writeBaselineReference as writeBaselineReference,
+  readBaselineReference,
+  writeBaselineReference,
 } from './baseline.ts';
 import {
   baselineFileFor,
@@ -173,12 +173,36 @@ const hash = baselineHash(entries);
 
 const store = storage();
 
-if (hash === previous) {
+/** Every object under a baseline folder, keyed by name, hash as the value. */
+const listFolder = async (folder: string): Promise<Map<string, string>> => {
+  const objects = await store.list(folder);
+  return new Map(objects.map((object) => [object.key, object.hash]));
+};
+
+/*
+ * What the store already holds under this name.
+ *
+ * A matching hash is not on its own enough to skip the upload. The store
+ * is gitignored while `baseline.txt` is committed, so a fresh checkout —
+ * or a `rm -rf .vrt` — leaves the reference naming a folder that is not
+ * there. The run then reports every shot as missing, accept recomputes
+ * the hash it started from, and answering "nothing changed" would leave
+ * the store still empty and the next run failing identically, with
+ * nothing short of hand-editing `baseline.txt` to break out of it. So ask
+ * the store what it has rather than trusting the name to imply it.
+ */
+const held = await listFolder(`${prefix}/${hash}/`);
+const hasEveryShot = entries.every(
+  ({ key, body }) =>
+    held.get(baselineKey(which, hash, key)) === hashBytes(body),
+);
+
+if (hash === previous && hasEveryShot) {
   /*
-   * Same pixels, so the folder is already right — but the versions that
-   * produced them may not have been recorded yet, and a baseline accepted
-   * before version recording existed has none at all. Backfill rather
-   * than exit, so every live baseline can say what rendered it.
+   * Same pixels, and the store has them — but the versions that produced
+   * them may not have been recorded yet, and a baseline accepted before
+   * version recording existed has none at all. Backfill rather than exit,
+   * so every live baseline can say what rendered it.
    */
   await recordVersions(store, prefix, hash, which);
   console.log(`[vrt] baseline ${hash} is already current — nothing changed`);
@@ -189,9 +213,15 @@ if (hash === previous) {
  * Copy the previous folder across first, so only what changed is uploaded.
  * With a local store this is a file copy; with GCS or S3 it is a
  * server-side copy and the bytes never leave the provider.
+ *
+ * Not when the hash has not moved, which is the repair case the check
+ * above falls through to: source and destination are then the same
+ * folder, and copying a file onto itself is pointless at best and
+ * truncates it at worst. `held` already describes that folder.
  */
 let copied = 0;
-if (previous !== undefined) {
+let target = held;
+if (previous !== undefined && previous !== hash) {
   const existing = await store.list(`${prefix}/${previous}/`);
   await Promise.all(
     existing.map(async (object) => {
@@ -200,13 +230,11 @@ if (previous !== undefined) {
     }),
   );
   copied = existing.length;
-}
 
-/* Then overwrite only the images whose bytes actually differ. */
-const copiedObjects = await store.list(`${prefix}/${hash}/`);
-const target = new Map(
-  copiedObjects.map((object) => [object.key, object.hash]),
-);
+  /* Re-read, so what follows compares against what the copy actually
+     landed rather than against the empty folder it started from. */
+  target = await listFolder(`${prefix}/${hash}/`);
+}
 
 /* Only the images whose bytes differ from what the copy already put
    there — this is where the incremental saving actually lands. */

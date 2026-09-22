@@ -1,7 +1,7 @@
 /**
  * Playwright configuration for the visual regression suite.
  *
- * The snapshot directory is `.vrt/baseline/`, hydrated from the store
+ * The snapshot directory is `.vrt/<tier>/baseline/`, hydrated from the store
  * before the run, so Playwright's own `toHaveScreenshot` comparator and its
  * HTML report do the comparing and the reviewing. The store replaces where
  * snapshots are *stored*, not how they are *compared* — which is what buys
@@ -33,6 +33,11 @@ const serveCli = fileURLToPath(new URL('serve-cli.ts', import.meta.url));
 const which = tier();
 
 const port = Number(process.env['VRT_PORT'] ?? 4319);
+
+/* One reading of the flag for both of the things that depend on it —
+   `CI=` set but empty had previously made `forbidOnly` false while still
+   cutting the worker count. */
+const isCi = Boolean(process.env['CI']);
 
 const projects: Project[] = browsers
   .filter((browser) => browser.tier === which)
@@ -70,7 +75,7 @@ export default defineConfig({
   snapshotPathTemplate: '{snapshotDir}/{arg}{ext}',
 
   fullyParallel: true,
-  forbidOnly: Boolean(process.env['CI']),
+  forbidOnly: isCi,
   /*
    * No retries. A retry that passes hides exactly the nondeterminism this
    * system is meant to expose — better to see the flake and fix its cause.
@@ -79,7 +84,7 @@ export default defineConfig({
   /* Spread rather than `undefined`, which `exactOptionalPropertyTypes`
      rejects: locally Playwright's own default is wanted, and CI runners
      are smaller than a laptop. */
-  ...(process.env['CI'] !== undefined && { workers: 2 }),
+  ...(isCi && { workers: 2 }),
 
   reporter: [
     ['list'],
@@ -128,8 +133,8 @@ export default defineConfig({
   webServer: {
     /*
      * Serves the already-built site. Our own server rather than a
-     * package: `build.format: 'preserve'` emits `__vrt/buttons.html` while
-     * the route is `/__vrt/buttons/`, and a generic static server's SPA
+     * package: `build.format: 'preserve'` emits `test/buttons.html` while
+     * the route is `/test/buttons/`, and a generic static server's SPA
      * fallback answers that mismatch with `index.html` and a 200 — which
      * screenshots the home page under the target's name and compares
      * cleanly. `serve.ts` has the detail.

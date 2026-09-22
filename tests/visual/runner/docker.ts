@@ -10,8 +10,20 @@
  * does not rebuild the image. `node_modules` is mounted too: the image and
  * the host are the same platform here — Docker Desktop runs an arm64 Linux
  * VM on an Apple Silicon machine — but a native module built for macOS
- * would not load in the container, so the install is redone into an
- * anonymous volume that shadows the host's copy.
+ * would not load in the container, so the install is redone into a volume
+ * that shadows the host's copy.
+ *
+ * That volume and the cache beside it are **named**, and the anonymous
+ * volume they replaced was the run's largest fixed cost. Docker seeds an
+ * anonymous volume from the image, and the image has nothing at a path
+ * that only exists inside the bind mount, so it arrived empty every
+ * `docker run` — every run reinstalled the whole tree from the registry,
+ * and corepack re-downloaded pnpm, before a single screenshot was taken.
+ * Measured at 11.6s per run against 0.6s once the volumes persist.
+ *
+ * `pnpm install --frozen-lockfile` still runs each time, so a persisted
+ * volume cannot drift from the lockfile — it reconciles or it fails. If
+ * one is ever wedged, `docker volume rm` it and the next run rebuilds it.
  */
 import { spawn } from 'node:child_process';
 import { argv, env, exit, stdout } from 'node:process';
@@ -20,11 +32,24 @@ import { repoRoot } from './config.ts';
 
 const IMAGE = 'webdevs-firefox-vrt:local';
 
-const run = (command: string, arguments_: string[]): Promise<number> =>
+/** Survives `docker run --rm`, so the install is paid once. */
+const MODULES_VOLUME = 'webdevs-firefox-vrt-node-modules';
+/** pnpm's store and corepack's download of pnpm itself. */
+const CACHE_VOLUME = 'webdevs-firefox-vrt-cache';
+/** Inside {@link CACHE_VOLUME}, so a cold install has the tarballs. */
+const STORE_DIRECTORY = '/root/.cache/pnpm-store';
+
+const run = (
+  command: string,
+  arguments_: string[],
+  /* `inherit` for the real work, so Docker's own progress is the run's
+     progress. `ignore` for anything asked only for its exit code. */
+  stdio: 'inherit' | 'ignore' = 'inherit',
+): Promise<number> =>
   new Promise((resolve, reject) => {
     const child = spawn(command, arguments_, {
       cwd: repoRoot,
-      stdio: 'inherit',
+      stdio,
       env,
     });
     child.on('error', reject);
@@ -33,15 +58,40 @@ const run = (command: string, arguments_: string[]): Promise<number> =>
     });
   });
 
-/** Whether the image exists locally. */
+/**
+ * `run`, for the one binary everything here needs.
+ *
+ * `spawn` reports a missing executable as an `error` event, so without
+ * this a machine with no Docker gets an unhandled ENOENT stack trace
+ * naming `spawn docker` — which is the one fact it does explain, buried
+ * under ten frames that explain nothing.
+ */
+const docker = async (
+  arguments_: string[],
+  stdio?: 'inherit' | 'ignore',
+): Promise<number> => {
+  try {
+    return await run('docker', arguments_, stdio);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    stdout.write(
+      '[vrt] docker is not on PATH — the suite only runs in the container\n',
+    );
+    return exit(1);
+  }
+};
+
+/** Whether the image exists locally. Asked for the exit code alone — left
+    on `inherit` it printed the image's whole JSON before every run, or the
+    daemon's "No such image" before every build. */
 const hasImage = async (): Promise<boolean> =>
-  (await run('docker', ['image', 'inspect', IMAGE])) === 0;
+  (await docker(['image', 'inspect', IMAGE], 'ignore')) === 0;
 
 const command = argv.slice(2);
 
 if (!(await hasImage())) {
   stdout.write(`[vrt] building ${IMAGE} — first run only\n`);
-  const built = await run('docker', [
+  const built = await docker([
     'build',
     '-f',
     'tests/visual/Dockerfile',
@@ -52,13 +102,15 @@ if (!(await hasImage())) {
   if (built !== 0) exit(built);
 }
 
+const install = `pnpm install --frozen-lockfile --store-dir ${STORE_DIRECTORY}`;
+
 /*
  * `--ipc=host` because Chromium's default 64MB /dev/shm makes it crash on
  * large pages, which a `fullPage` capture of the prose specimen certainly
  * is. `--init` so a browser that outlives the run is reaped rather than
  * left as a zombie holding the container open.
  */
-const code = await run('docker', [
+const code = await docker([
   'run',
   '--rm',
   '--init',
@@ -66,7 +118,9 @@ const code = await run('docker', [
   '-v',
   `${repoRoot}:/work`,
   '-v',
-  '/work/node_modules',
+  `${MODULES_VOLUME}:/work/node_modules`,
+  '-v',
+  `${CACHE_VOLUME}:/root/.cache`,
   '-w',
   '/work',
   ...(env['VRT_TIER'] === undefined
@@ -77,8 +131,8 @@ const code = await run('docker', [
   'bash',
   '-lc',
   command[0] === 'shell'
-    ? 'pnpm install --frozen-lockfile && exec bash'
-    : `pnpm install --frozen-lockfile && ${command.join(' ')}`,
+    ? `${install} && exec bash`
+    : `${install} && ${command.join(' ')}`,
 ]);
 
 exit(code);

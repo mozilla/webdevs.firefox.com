@@ -559,19 +559,19 @@ Three things bind from outside `tests/visual/`:
   and screenshots `dist/`. So a screenshot is of the site as built, not of
   a VRT-only variant of it. Animation overrides, scrollbar suppression and
   an eager-images script were each tried and each removed once measured;
-  the README's "What is not stabilised" records what they did and why they
+  the README's "What is not stabilized" records what they did and why they
   were wrong. Don't add one back without emptying it out first and showing
   the failure it prevents.
 - **`.vrt/` is ignored by git, ESLint, Prettier and the dev server's
   watcher.** The last one matters in practice: a run writes thousands of
   trace artifacts, and without it `pnpm dev` logs a `[watch]` line for each.
-
-**Screenshots are re-compressed with `sharp` before storage** — losslessly,
-same pixels, about a fifth of the size. They stay PNG deliberately: a
-smaller format like JPEG XL would save a little more, but Playwright picks
-its image comparator from the file extension and implements only PNG and
-JPEG, so anything else means decoding both sides by hand and giving up the
-report's Diff and Slider views.
+- **Screenshots are re-compressed with `sharp` before storage** —
+  losslessly, the same pixels roughly 30% smaller. `sharp` is already a
+  dependency here, so this costs nothing but the encode. They stay PNG
+  deliberately: a smaller format like JPEG XL would save more, but
+  Playwright picks its image comparator from the file extension and
+  implements only PNG and JPEG, so anything else means decoding both sides
+  by hand and giving up the report's Diff and Slider views.
 
 ## Not yet built
 
